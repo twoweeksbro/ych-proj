@@ -5,20 +5,21 @@ import plotly.express as px
 
 
 # .shp 파일만 지정하면 나머지(.dbf, .shx, .prj 등)는 자동 로딩
-shapefile_path = "../ycsi-proj/data/ych-map/sig.shp"
+shapefile_path = "../data/ych-map/sig.shp"
 
 
 gdf = gpd.read_file(shapefile_path, encoding='euc-kr')
 
 
-gdf = gdf.to_crs(epsg=4623)
+# gdf = gdf.to_crs(epsg=4623)
 gdf.to_file("korea_districts.geojson", driver="GeoJSON")
 
-auto_voice = pd.read_csv("../ycsi-proj/data/경상북도 영천시_자동음성통보시스템_20241120.csv")
+auto_voice = pd.read_csv("../data/경상북도 영천시_자동음성통보시스템_20241120.csv")
 auto_voice['좌표정보(X)']
 auto_voice['좌표정보(Y)']
 
 auto_voice.head()
+auto_voice['장소명'].value_counts().index.to_list()
 
 import json
 with open('korea_districts.geojson', encoding='utf-8') as f:
