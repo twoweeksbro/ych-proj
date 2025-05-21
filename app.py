@@ -13,7 +13,7 @@ from faicons import icon_svg
 import os
 import folium  #원정 추가
 from folium.features import GeoJsonTooltip, DivIcon
-
+import numpy as np
 import plotly.graph_objs as go #원정추가
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -31,8 +31,6 @@ if 'SHINY_SERVER' in os.environ:
 else:
     app_dir = Path(__file__).parent  # 로컬 환경
 
-# app_dir = Path(__file__).parent
-
 # ui.page_opts(title="2025년 제4회 영천시 공공데이터 활용 경진대회", page_fn=partial(page_navbar, id="page"), fillable=False)
 # 두번째 잘 되는 네비바
 ui.page_opts(title=ui.tags.div(
@@ -45,174 +43,483 @@ ui.page_opts(title=ui.tags.div(
     ), page_fn=partial(page_navbar, id="page"), fillable=False)
 
 auto_voice = pd.read_csv(app_dir / "data/경상북도 영천시_자동음성통보시스템_20241120.csv")
+# app_dir = Path(__file__).parent
 
 with ui.nav_panel("온열질환 위험성"):
-    with ui.layout_columns(col_widths=(4,8)):
-        with ui.layout_column_wrap(width=1):
+    with ui.layout_column_wrap():
+        with ui.card():
+            ui.h4("10만명당 온열질환자 수")
+
+            @render_widget
+            def choropleth_map_plotly():
+                csv_path = app_dir / "data/온열질환자_지도용.csv"
+                geo_path = app_dir / "data/TL_SCCO_CTPRVN.json"
+
+                # 데이터 로딩
+                df = pd.read_csv(csv_path)
+                with open(geo_path, encoding="utf-8") as f:
+                    geojson = json.load(f)
+
+                fig = px.choropleth(
+                    df,
+                    geojson=geojson,
+                    featureidkey="properties.CTP_KOR_NM",
+                    locations="지역",
+                    color="10만명당 온열질환자수",
+                    color_continuous_scale="YlOrRd",
+                    # range_color=(30, 150),
+                    labels={"10만명당 온열질환자수": "10만명당 발생수"},
+                )
+
+                fig.update_geos(
+                    fitbounds="locations",
+                    visible=False,
+                    projection_scale=7,
+                    center={"lat": 36.5, "lon": 127.8}
+                )
+
+                fig.update_layout(
+                    margin={"r": 0, "t": 30, "l": 0, "b": 0},
+                    height=400,
+                    title="도별 10만명당 온열질환자수"
+                )
+
+                return fig
+            
+        with ui.card():
+            ui.h4("영천시 온열질환 관련 요약 지표")
+
+            with ui.layout_column_wrap(width=1/3):  # 3열로 자동 래핑
+            
+                # 1행
+                with ui.value_box(showcase=icon_svg("calendar")):
+                    "연도"
+                    @render.text
+                    def year_text():
+                        return "2022"
+
+                with ui.value_box(showcase=icon_svg("temperature-high")):
+                    "최고기온"
+                    @render.text
+                    def max_temp():
+                        return "35.6℃"
+
+                with ui.value_box(showcase=icon_svg("sun")):
+                    "폭염일수"
+                    @render.text
+                    def heat_days():
+                        return "15일"
+
+                # 2행
+                with ui.value_box(showcase=icon_svg("users")):
+                    "영천 총인구"
+                    @render.text
+                    def total_pop():
+                        return "100781명"
+
+                with ui.value_box(showcase=icon_svg("briefcase-medical")):
+                    "온열질환자 수"
+                    @render.text
+                    def patient_count():
+                        return "154명"
+
+                with ui.value_box(showcase=icon_svg("chart-line")):
+                    "온열질환 발생순위(시군기준)"
+                    @render.text
+                    def rank():
+                        return "8위"
+
+                # 3행
+                with ui.value_box(showcase=icon_svg("user-check")):
+                    "65세 이상 비율"
+                    @render.text
+                    def senior_ratio():
+                        return "30.9%"
+
+                with ui.value_box(showcase=icon_svg("hourglass-half")):
+                    "평균연령"
+                    @render.text
+                    def avg_age():
+                        return "51.3세"
+
+                with ui.value_box(showcase=icon_svg("leaf")):
+                    "농업 종사자 비율"
+                    @render.text
+                    def farmer_ratio():
+                        return "36.1%"
+
+    with ui.layout_columns():
+        with ui.layout_sidebar():
+            with ui.sidebar():
+                with ui.card():
+                    ui.h4("연도 선택")
+                    ui.input_radio_buttons(
+                        id="year_card",
+                        label=None,
+                        choices=["2020", "2021", "2022", "2023", "2024"],
+                        selected="2022"
+                    )
+            job_hot_data = pd.read_csv(app_dir / "data/ill_loc.csv")
+
             with ui.card():
-                # 시각화
-                @render_widget
-                def year_hot():
-                    file_path = app_dir / "data" / "heat_ill.csv"
-                    merged_df = pd.read_csv(file_path)
-                    bar_trace = go.Bar(
-                        x=merged_df["연도"],
-                        y=merged_df["온열질환자 수"],
-                        yaxis='y',
-                        name='온열질환자 수',
-                    )
-                    line_trace = go.Scatter(
-                        x=merged_df["연도"],
-                        y=merged_df["폭염일수"],
-                        name='폭염 일수',
-                        yaxis='y2',
-                        mode='lines+markers+text',
-                        text=merged_df["폭염일수"],
-                        textposition='top center',
-                        line=dict(color='red')
-                    )
-                    layout = go.Layout(
-                        title='영천시 연도별 온열질환자 수 및 폭염 일수',
-                        xaxis=dict(title='연도',type='category'),
-                        yaxis=dict(title='온열질환자 수', side='left'),
-                        yaxis2=dict(title='폭염일수', overlaying='y', side='right'),
-                        legend=dict(x=0.0, y=1.0, orientation='v'),
-                        bargap=0.3
-                    )
-                    return go.Figure(data=[bar_trace, line_trace], layout=layout)
-            with ui.card():
-                @render_widget
-                def year_hot_corr():
-                    file_path = app_dir / "data" / "heat_ill.csv"
-                    df = pd.read_csv(file_path)
-                    from scipy.stats import pearsonr
-                    # 상관계수 계산
-                    correlation, p_value = pearsonr(df['폭염일수'], df['온열질환자 수'])
-                    # Plotly 회귀선 산점도 생성
-                    fig = px.scatter(
-                        df,
-                        x="폭염일수",
-                        y="온열질환자 수",
-                        trendline="ols",  # 회귀선 추가
-                        title=f"폭염일수와 온열질환자수의 상관관계 (r={correlation:.2f}, p={p_value:.3f})",
-                        labels={"폭염일수": "폭염일수", "온열질환자 수": "온열질환자수"},
-                    )
-                    fig.update_layout(
-                        xaxis_title="폭염일수",
-                        yaxis_title="온열질환자수",
-                        template="plotly_white",
-                        height=500
-                    )
-                    return fig
-    
-        with ui.navset_card_tab(id="tab"):  
-            with ui.nav_panel("직종"):
-                with ui.layout_column_wrap(width=1 / 2):
-                    with ui.card():
-                        @render_widget
-                        def job_hot():
-                            # 데이터 정의
-                            hit_ill = [581, 95, 230, 41, 17, 161, 57, 103, 66, 36, 127, 22, 28]
-                            hit_ill_location = [
-                                "실외작업장", "운동장", "논/밭", "산", "강가/해변", "길가", "주거지주변", "실외기타",
-                                "집", "건물", "실내작업장", "비닐하우스", "실내기타"
-                            ]
+                ui.div('온열질환 발생 현황 분석: 장소, 직종, 연령을 중심으로', style="text-align: center; font-weight: bold; font-size: 30px;")
+                ui.div('⚠️ 온열질환: 고온 환경에서 체온 조절이 제대로 되지 않아 발생하는 질환 ➡️ 여름철 장시간 실외 작업 및 체온조절 능력이 떨어지는 고령자의 경우 더 쉽게 영향을 받음  ', style="font-weight: bold; font-size: 18px;")
+            with ui.navset_card_tab(id="tab"):
+                with ui.nav_panel("직종"):
+                    with ui.layout_column_wrap(width=1 / 2):
+                        with ui.card():
+                            @render_widget
+                            def job_hot():
+                                # 데이터 정의
+                                selected_year = input.year_card()
+                                hit_ill = job_hot_data[selected_year]
+                                hit_ill_location = job_hot_data['location']
 
-                            # 실외/실내 분류
-                            outdoor_labels = ["실외작업장", "운동장", "논/밭", "산", "강가/해변", "길가", "주거지주변", "실외기타"]
-                            indoor_labels = ["집", "건물", "실내작업장", "비닐하우스", "실내기타"]
+                                # 실외/실내 분류
+                                outdoor_labels = ["실외작업장", "운동장", "논/밭", "산", "강가/해변", "길가", "주거지주변", "실외기타"]
 
-                            # DataFrame 생성 및 구분 열 추가
-                            df = pd.DataFrame({"장소": hit_ill_location, "건수": hit_ill})
-                            df["구분"] = df["장소"].apply(lambda x: "실외" if x in outdoor_labels else "실내")
+                                # DataFrame 생성 및 구분 열 추가
+                                df = pd.DataFrame({"장소": hit_ill_location, "건수": hit_ill})
+                                df["구분"] = df["장소"].apply(lambda x: "실외" if x in outdoor_labels else "실내")
 
-                            # 실외/실내 정렬 및 병합
-                            df_out = df[df["구분"] == "실외"].sort_values(by="건수", ascending=False)
-                            df_in = df[df["구분"] == "실내"].sort_values(by="건수", ascending=False)
-                            df_sorted = pd.concat([df_out, df_in])
+                                # 실외/실내 정렬 및 병합
+                                df_out = df[df["구분"] == "실외"].sort_values(by="건수", ascending=False)
+                                df_in = df[df["구분"] == "실내"].sort_values(by="건수", ascending=False)
+                                df_sorted = pd.concat([df_out, df_in])
 
-                            # 색상 지정: 논/밭은 빨간색, 나머지는 파란색 계열
-                            colors = ["red" if loc == "논/밭" else "#1f77b4" for loc in df_sorted["장소"]]
+                                # 색상 지정: 논/밭은 빨간색, 나머지는 파란색 계열
+                                colors = ["red" if loc == "논/밭" else "#d3d3d3" for loc in df_sorted["장소"]]
 
-                            # Plotly 막대 그래프 생성
-                            fig = go.Figure(go.Bar(
-                                x=df_sorted["장소"],
-                                y=df_sorted["건수"],
-                                marker_color=colors,
-                                text=df_sorted["건수"],
-                                textposition="outside"
-                            ))
+                                # Plotly 막대 그래프 생성
+                                fig = go.Figure(go.Bar(
+                                    x=df_sorted["장소"],
+                                    y=df_sorted["건수"],
+                                    marker_color=colors,
+                                    text=df_sorted["건수"],
+                                    textposition="outside"
+                                ))
 
-                            fig.update_layout(  
-                                title="폭염 관련 장소별 온열질환 발생 건수",
-                                xaxis_title="장소",
-                                yaxis_title="온열질환 발생 건수",
-                                xaxis_tickangle=-45,
-                                template="plotly_white"
-                            )
+                                fig.update_layout(  
+                                    title="전국 장소별 온열질환 발생 건수",
+                                    xaxis_title="장소",
+                                    yaxis_title="온열질환 발생 건수",
+                                    xaxis_tickangle=-45,
+                                    template="plotly_white"
+                                )
 
-                            return fig
+                                return fig
 
-                    with ui.card():
-                        @render_widget
-                        def job():
-                            file_path_ = app_dir / "data" / "job.csv"
+                            ui.card_footer("📌농민 비율은 0.2%지만 논/밭이 온열질환 발생의 2위 장소에 해당.",style="font-size: 18px;")
+
+                        with ui.card():
+                            file_path_ = app_dir / "data" / "직업분포_비율.csv"
                             df = pd.read_csv(file_path_)
-                            data_2022 = df[df["연도"] == 2022].iloc[0]
-                            labels = ['관리자', '사무종사자', '서비스업종사자', '농어업종사자', '기계종사자', '단순노무종사자']
-                            values = data_2022[labels].tolist()
-                            fig_donut = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.4)])
-                            return fig_donut.update_layout(title='2022년 연도별 영천시 직종비율')
-            with ui.nav_panel("나이"):
-                with ui.layout_column_wrap(width=1 / 2):
-                    with ui.card():
-                        @render_widget
-                        def age_hot():
-                            # 데이터 정의
-                            age_groups = ['0-9세', '10-19세', '20-29세', '30-39세', '40-49세', '50-59세', '60-69세', '70-79세', '80세 이상']
-                            bar_values = [12, 103, 372, 478, 538, 716, 678, 434, 373]
-                            line_values = [0.4, 2.2, 6.2, 7.2, 6.9, 8.2, 8.7, 10.6, 15.4]
-                            # 막대 그래프 (온열질환자 수)
-                            bar_trace = go.Bar(
-                                x=age_groups,
-                                y=bar_values,
-                                yaxis='y',  # 왼쪽 y축 사용
-                                name='온열질환자 수',
-                            )
-                            # 선 그래프 (인구 10만명당 온열질환자 수)
-                            line_trace = go.Scatter(
-                                x=age_groups,
-                                y=line_values,
-                                name='인구 10만명당 온열질환자 수(명)',
-                                yaxis='y2',  # 오른쪽 y축 사용
-                                mode='lines+markers+text',
-                                text=line_values,
-                                textposition='top center',
-                                line=dict(color='red')
-                            )
-                            # 레이아웃 설정
-                            layout = go.Layout(
-                                title='연령별 온열질환자 수 및 인구 10만명당 비율',
-                                xaxis=dict(title='연령별'),
-                                yaxis=dict(title='온열질환자수', side='left'),
-                                yaxis2=dict(title='인구 10만명당 온열질환자 수', overlaying='y', side='right'),
-                                legend=dict(x=0.0, y=1.0, orientation='v'),
-                                bargap=0.3
-                            )
-                            # 그래프 생성
-                            return go.Figure(data=[bar_trace, line_trace], layout=layout)
-                    with ui.card():
-                        @render_widget
-                        def ycs_age():
-                            file_path_ = app_dir / "data" / "age1.csv"
+                            @render_widget
+                            def job():
+                                selected_year = input.year_card()
+                        
+                                values = df[selected_year].iloc[1:].tolist()
+                                labels = df["직종별"].iloc[1:].tolist()
+                        
+                                # 🔸 텍스트 조건: 0.5% 미만만 외부에 이름 표시 (중복 방지용)
+                                custom_text = [l if v < 0.5 else "" for l, v in zip(labels, values)]
+                                custom_position = ["outside" if v < 0.5 else "inside" for v in values]
+                                text_colors = ["red" if v < 1 else "black" for v in values]
+                                text_sizes = [16 if v < 1 else 12 for v in values]
+                        
+                                # 🔸 색상 분류
+                                def classify_color(label):
+                                    if label == "농림·어업 숙련 종사자":
+                                        return "green"  # 1분류
+                                    elif label in ["단순노무 종사자"]:
+                                        return "steelblue"  # 2분류
+                                    else:
+                                        return "lightgray"  # 3분류
+                        
+                                colors = [classify_color(l) for l in labels]
+                        
+                                fig_donut = go.Figure(data=[go.Pie(
+                                    labels=labels,
+                                    values=values,
+                                    hole=0.4,
+                                    text=custom_text,                        # 외부 텍스트 제한
+                                    textinfo="label+percent",                # ✅ 내부에 label + percent 표시
+                                    textposition=custom_position,
+                                    textfont=dict(color=text_colors, size=text_sizes),
+                                    marker=dict(colors=colors),              # ✅ 색상 지정
+                                    insidetextorientation="radial",
+                                    hoverinfo="label+value+percent",
+                                    sort=False
+                                )])
+                        
+                                fig_donut.update_layout(title=f"{selected_year}년 직종비율")
+                                return fig_donut
+                            with ui.card_footer(style="font-size: 18px;"):
+                                @render.text
+                                def job_summaray():
+                                    selected_year = input.year_card()
+                                    year_col = str(selected_year)
+                                    target_jobs = [
+                                        '단순노무 종사자',
+                                        '농림·어업 숙련 종사자'
+                                    ]
+                                    filtered_df = df[df['직종별'].isin(target_jobs)]
+                                    total_value = filtered_df[year_col].sum()
+
+                                    return f"🧾 야외 직종 비율 합계: {total_value:.1f}%"
+
+                with ui.nav_panel("나이"):
+                    with ui.layout_column_wrap(width=1 / 2):
+                        with ui.card():
+                            file_path_ = app_dir / "data" / "age_hit_ill.csv"
+                            hit_ill_data = pd.read_csv(file_path_)
+                            @render_widget
+                            def age_hot():
+                                # 데이터 정의
+                                selected_year = input.year_card()
+                                age_groups = hit_ill_data['age_groups']
+                                bar_values = hit_ill_data[f"age_{selected_year}"]
+                                line_values = hit_ill_data[f"age_10_{selected_year}"]
+                                
+                                red_ages = ['60-69세', '70-79세', '80세 이상']  # ← 빨간색으로 표시할 연령대 목록
+                                bar_colors = ['red' if age in red_ages else '#d3d3d3' for age in age_groups]
+
+
+                                bar_trace = go.Bar(
+                                    x=age_groups,
+                                    y=bar_values,
+                                    yaxis='y',  # 왼쪽 y축 사용
+                                    name='온열질환자 수',
+                                    marker=dict(color=bar_colors)
+                                )
+                                # 선 그래프 (인구 10만명당 온열질환자 수)
+                                line_trace = go.Scatter(
+                                    x=age_groups,
+                                    y=line_values,
+                                    name='인구 10만명당 온열질환자 수(명)',
+                                    yaxis='y2',  # 오른쪽 y축 사용
+                                    mode='lines+markers+text',
+                                    text=line_values,
+                                    textposition='top center',
+                                    line=dict(color='red')
+                                )
+                                # 레이아웃 설정
+                                layout = go.Layout(
+                                    title='전국 연령별 온열질환자 수 및 인구 10만명당 비율',
+                                    xaxis=dict(title='연령별'),
+                                    yaxis=dict(title='온열질환자수', side='left'),
+                                    yaxis2=dict(title='인구 10만명당 온열질환자 수', overlaying='y', side='right'),
+                                    legend=dict(x=0.0, y=1.0, orientation='v'),
+                                    bargap=0.3
+                                )
+                                # 그래프 생성
+                                return go.Figure(data=[bar_trace, line_trace], layout=layout)
+                            with ui.card_footer(style="font-size: 18px;"):
+                                @render.text
+                                def age_summary():
+                                    selected_year = input.year_card()
+                                    bar_values = hit_ill_data[f"age_{selected_year}"]
+                                    up_60 = bar_values.iloc[6:].sum() / bar_values.sum() * 100
+                                    return f"📌 60대 이상의 온열질환 비율: {up_60:.1f}%"
+
+                        with ui.card():
+                            file_path_ = app_dir / "data" / "연도별_연령.csv"
                             age = pd.read_csv(file_path_)
-                            labels = age["나이대"].tolist()
-                            values = age["2022"].tolist()  # 2022년 열 값 사용
-                            labels
-                            fig_donut = go.Figure(
-                                data=[go.Pie(labels=labels, values=values, hole=0.4, sort=False)]
-                            )
-                            return fig_donut.update_layout(title="2022년 연도별 영천시 나이대 비율 (도넛차트)")
+                            @render_widget
+                            def ycs_age():
+                                selected_year = input.year_card()
+                                labels = age["연령별"].tolist()
+                                values = age[selected_year].tolist() 
+                                highlight_ages = ['60대', '70대', '80대이상']
+                                colors = ['steelblue' if age in highlight_ages else '#d3d3d3' for age in labels]
+                                labels
+                                fig_donut = go.Figure(
+                                    data=[go.Pie(labels=labels, values=values, hole=0.4, sort=False,marker=dict(colors=colors),
+                                                 textinfo='label+percent',
+                                                textposition='inside')]
+                                )
+                                return fig_donut.update_layout(title=f"{selected_year}년 전국 연령대 비율")
+                            with ui.card_footer(style="font-size: 18px;"):
+                               @render.text
+                               def age_summary2():
+                                selected_year = input.year_card()
+                                year_col = str(selected_year)
+                                target_jobs = ['60대','70대','80대이상']
+                                filtered_df = age[age['연령별'].isin(target_jobs)]
+                                total_value = filtered_df[year_col].sum()
+                                return f"🧾 전국 60대 이상 비율 합계: {total_value:.1f}%"
+                               
+
+            with ui.card():
+                ui.div("✅ 온열질환 위험군(농민·고령자) 맞춤 예방 중심의 선제적 알림체계 구축 필요",style="text-align: center; font-weight: bold; font-size: 20px;")
+
+
+
+    with ui.card():
+        ui.div("영천시 직종 및 연령 분포", style="text-align: center; font-weight: bold; font-size: 30px;")
+
+    with ui.layout_column_wrap(width=1 / 2):
+        with ui.card():
+            @render_widget
+            def job_yc():
+                file_path_ = app_dir / "data" / "job.csv"
+                df = pd.read_csv(file_path_)
+                labels = ['농어업종사자', '관리자', '사무종사자', '서비스업종사자', '기계종사자', '단순노무종사자']
+                years = sorted(df['연도'].unique())
+                color_map = {
+                    '농어업종사자': 'red',
+                    '관리자': '#d3d3d3',
+                    '사무종사자': '#d3d3d3',
+                    '서비스업종사자': '#d3d3d3',
+                    '기계종사자': '#d3d3d3',
+                    '단순노무종사자': '#d3d3d3'
+                    }
+                fig = go.Figure()
+                for label in labels:
+                    fig.add_trace(go.Bar(
+                        x=years,
+                        y=[df[df['연도'] == y][label].values[0] for y in years],
+                        name=label,
+                        marker_color=color_map[label]
+                    ))
+
+                fig.update_layout(
+                    barmode='stack',  
+                    title='연도별 영천시 직종별 취업비율 누적 막대그래프',
+                    xaxis_title='연도',
+                    yaxis_title='취업 비율',
+                    height=500,
+                )
+
+                return fig
+            ui.card_footer("✅ 타직종에 비해 연도별 가장 많은 비율을 차지하는 농어업 종사자", style="font-size: 18px;")
+
+        with ui.card():
+            @render_widget
+            def ycs_age2():
+                file_path_ = app_dir / "data" / "age1.csv"
+                age = pd.read_csv(file_path_)
+                df_transposed = age.set_index('나이대').T.reset_index()
+                df_melted = df_transposed.melt(id_vars='index', var_name='나이대', value_name='인구비율')
+                df_melted.rename(columns={'index': '연도'}, inplace=True)
+                custom_order = ['65세 이상', '65세 미만', '50대', '40대', '30대', '20대', '10대', '0대']
+                df_melted['나이대'] = pd.Categorical(df_melted['나이대'], categories=custom_order, ordered=True)
+                df_melted = df_melted.sort_values(['연도', '나이대'])
+
+                color_map = {age: '#d3d3d3' for age in custom_order}
+                color_map['65세 이상'] = 'blue'
+
+                fig = px.bar(
+                    df_melted,
+                    x="연도",
+                    y="인구비율",
+                    color="나이대",
+                    title="영천시 연도별 연령대 누적 막대 그래프",
+                    barmode="stack",
+                    category_orders={"나이대": custom_order},
+                    color_discrete_map=color_map
+                )
+
+                return fig
+            ui.card_footer("✅ 다른 연령대에 비해 연도별 가장 많은 비율을 차지하는 65세 이상 인구 비율", style="font-size: 18px;")
+    with ui.layout_column_wrap(width=1 / 2):
+        with ui.card():
+            @render_widget()
+            def population():
+                file_path = app_dir / "data" / "population_update.xlsx"
+                df = pd.read_excel(file_path)
+
+                target_col = '65세 이상 고령자 (명)'
+                year_col = '연도'
+
+                df1 = df.copy()
+                # 연도 기준 정렬 및 인덱스 리셋
+                df1 = df1.sort_values(by=year_col).reset_index(drop=True)
+
+                # 예측 연도와 학습 윈도우
+                last_year = df1[year_col].max()
+                predict_years = list(range(last_year + 1, last_year + 11))
+                window_size = 5
+
+                for predict_year in predict_years:
+                    # 예측 대상 연도 이전의 데이터 중 마지막 window_size 개
+                    train_df = df1[df1[year_col] < predict_year].tail(window_size)
+
+                    # 선형 회귀 계수 계산
+                    coeff = np.polyfit(train_df[year_col], train_df[target_col], 1)   #앞에값: 기울기, 뒤에값: 절편편
+                    trend_func = np.poly1d(coeff)
+
+                    # 예측값 계산
+                    pred_value = trend_func(predict_year)
+
+
+                    df1 = pd.concat([
+                        df1,
+                        pd.DataFrame({year_col: [predict_year], target_col: [pred_value]})
+                    ], ignore_index=True)
+
+
+                fig = go.Figure()
+
+                # 라인 추가
+                fig.add_trace(go.Scatter(
+                    x=df1[year_col],
+                    y=df1[target_col],
+                    mode='lines+markers',
+                    name='고령자 수'
+                ))
+
+                fig.add_vline(x=2022, line_dash="dot", line_color="red", annotation_text="2022")
+
+                fig.update_layout(
+                    title="영천시 연도별 65세 이상 인구의 추세선",
+                    xaxis_title="연도",
+                    yaxis_title="고령자 수 (명)",
+                    xaxis=dict(dtick=2),
+                    font=dict(family="Malgun Gothic", size=14),
+                    margin=dict(l=40, r=40, t=60, b=40),
+                    height=500
+                )
+
+                return fig
+            with ui.card_footer(style="font-size: 18px;"):
+                ui.markdown("📌 65세 이상 인구는 매년 증가하고 있음. (경북도 추가해서 비교?)")
+                ui.markdown("📈 최근 5년 데이터를 이용해 매년 65세 이상 인구 예측.")
+        with ui.card():
+            ui.markdown('☀️ **폭염, 예방 가능한 유일한 재난**')
+            ui.markdown('즉시성은 낮지만 치명적')
+            ui.markdown('폭염은 눈에 띄는 외부 피해 없이 장시간 노출 시 발생하는 재난으로,')
+            ui.markdown('‘위험 인지 → 행동 전환’ 사이에 큰 간극이 존재합니다.')
+            ui.markdown('하지만 그렇기에 미리 알리고, 예방할 수 있는 재난입니다.')
+            ui.markdown('👉 지속적 알림 체계를 통해 시민의 인지와 행동을 유도해야 합니다.')
+            ui.br()
+            ui.markdown('📊 **온열질환, 경북과 영천의 현황**')
+            ui.markdown('✅ 경상북도: 10만 명당 온열질환자 수 17개 시도 중 5위')
+            ui.markdown('✅ 영천시: 온열질환 발생 비율 전국 157개 시군 중 8위')
+
+            ui.markdown('👥 **주요 위험군**')
+            ui.markdown('농어업 종사자 <br>'
+                           '⤷ 전체 직종의 0.2%지만 <br>'
+                                '⤷ 온열질환 발생 장소 2위는 논·밭')
+            ui.markdown('60세 이상 고령자 <br>' 
+                            '⤷ 전체의 약 30% 차지 <br>'
+                                '⤷ 타 연령 대비 취약성 매우 높음')
+
+            ui.markdown('📍 영천시 특징')
+            ui.markdown('농어업 종사자 비중: 연도별 약 30% <br>'
+                        '고령 인구 비중: 연도별 약 30%, 지속 증가 중')
+
+
+            ui.markdown('✅ 결론')
+            ui.markdown('🎯 고위험군(농민·고령자) 중심의 맞춤형·선제적 폭염 알림체계 구축 필요')
+
+
+
+
+
+
+
+
 
 with ui.nav_panel('자동 음성 통보시스템이란?'):
     with ui.layout_sidebar():
