@@ -20,14 +20,15 @@ with open(geojson_path, encoding='utf-8') as f:
     geojson_data = json.load(f)
 
 
-gdf_green = gpd.read_file(app_dir / "data/farm-map/green-map/green.shp")
-gdf_green_single = gdf_green.dissolve()
+# gdf_green = gpd.read_file(app_dir / "data/farm-map/green-map/green.shp")
+# gdf_green_single = gdf_green.dissolve()
 # gdf_green_single.to_file(app_dir / "data/green_single.geojson", driver="GeoJSON")
 
-with open(app_dir / "data/green_single.geojson", encoding='utf-8') as f:
-    geojson_green_single = json.load(f)
+# with open(app_dir / "data/green_single.geojson", encoding='utf-8') as f:
+#     geojson_green_single = json.load(f)
 
-fruit_path = app_dir / "data/green.geojson"
+fruit_path = app_dir / "data/merged_simplified3.geojson"
+# fruit_path = app_dir / "data/fruit.geojson"
 with open(fruit_path, encoding='utf-8') as f:
     geojson_fruit = json.load(f)
     

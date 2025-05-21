@@ -1,6 +1,14 @@
 faicons
 shiny
+shinywidgets
+pathlib
 seaborn
 pandas
 geopandas
+faicons
+matplotlib
 plotly
+numpy
+folium
+mapclassify
+openpyxl

@@ -20,7 +20,7 @@ import seaborn as sns
 
 import asyncio
 
-from shared import geojson_data, gdf, geojson_fruit, geojson_buffer, geojson_grid, gdf_grid, geojson_green_single
+from shared import geojson_data, gdf, geojson_fruit, geojson_buffer, geojson_grid, gdf_grid
 
 
 #statsmodels 설치 필요
@@ -522,9 +522,59 @@ with ui.nav_panel("온열질환 위험성"):
 
 
 with ui.nav_panel('자동 음성 통보시스템이란?'):
+    with ui.layout_column_wrap(width=1):
+        with ui.card(style="height: auto;"):
+            with ui.card():
+                ui.div('🔥 폭염 피해 예방의 핵심: 음성경보시스템', style="text-align: center; font-weight: bold; font-size: 30px;")
+            with ui.layout_column_wrap():
+                with ui.card():
+                    ui.h4("✅ 음성경보시스템(AVAS)의 온열질환 예방 효과")
+                    with ui.layout_column_wrap(width=1):
+                        with ui.card(style="max-height: 250px;"):
+                            ui.markdown("""
+                                ### **1. 사망자 수 감소 효과 (Heat-related Mortality 감소)** 
+                                - 🇫🇷 **프랑스 (2006년)**: 폭염경보시스템(HWS) 도입 후 **약 4,400명의 초과 사망자** 예방  
+                                - 🇭🇰 **홍콩(65세 이상)**: 허혈성 심장질환·뇌졸중 등과 관련된 사망 **약 1,300건 감소**  
+                                - 🇬🇧 **영국**: 폭염경보 운영을 통해 **117명의 생명 보호** 및 **높은 비용 효율성 입증**""")
+                        with ui.card(style="max-height: 250px;"):
+                            ui.markdown("""
+                                        ### **2. 문자 기반 재난경보의 한계 보완** 
+                                        - 국내 **65세 이상 고령자의 스마트폰 보급률은 66.5%
+                                        - 스마트폰이 아니라면 재난문자 전달율 저하""")
+
+                with ui.card():
+                    ui.h4("✅ 음성경보시스템의 정의")
+                    with ui.layout_column_wrap(width=1):
+                        with ui.card(style="max-height: 250px;"):
+                            ui.markdown("""
+                                ### **음성경보시스템이란?**  
+
+                                **음성경보시스템(AVAS, Automated Voice Alert System)은**  
+                                특히 **고령자, 시각장애인, 문자 수신이 어려운 정보 취약계층**에게  
+                                보다 빠르고 효과적으로 위험 상황을 전달할 수 있어,  
+                                **즉각적인 행동 유도와 인명 피해 예방**에 중요한 역할을 합니다.
+                                """)
+                        with ui.card(style="max-height: 250px;"):
+                            ui.h4("🔥 폭염 단계별 대응 수칙")
+
+                            ui.markdown("""
+                        | 구분   | 체감온도 기준 | 휴식 기준           | 야외 작업 기준           | 비고              |
+                        |--------|----------------|----------------------|----------------------------|-------------------|
+                        | 주의   | 33도           | 매 시간 10분 휴식    | 14~17시 야외 작업 조정     | -                 |
+                        | 경고   | 35도           | 매 시간 15분 휴식    | 14~17시 야외 작업 중지     | -                 |
+                        | 위험   | 38도           | 매 시간 15분 휴식    | 14~17시 야외 작업 중지     | 업무담당자 파견    |
+                            """)
+                with ui.card():
+                    ui.img(
+                        src="음성경보시스템.png",
+                        alt="온열질환 예방 안내 이미지",
+                        style="height:600px; width:auto; display:block; margin:auto;"
+                    )
+                
+            
     with ui.layout_sidebar():
         with ui.sidebar():
-            
+        
             choices = auto_voice['행정동명'].value_counts().index.to_list() #원정추가
             with ui.accordion(open=False):
                 with ui.accordion_panel("행정구역"):
@@ -548,230 +598,181 @@ with ui.nav_panel('자동 음성 통보시스템이란?'):
                 with ui.Progress(min=1, max=15) as p:
                     p.set(message="Calculation in progress", detail="This may take a while...")
 
-                    # for i in range(1, 15):
-                    #     p.set(i, message="Computing")
-                    #     await asyncio.sleep(0.1)
+                        # for i in range(1, 15):
+                        #     p.set(i, message="Computing")
+                        #     await asyncio.sleep(0.1)
 
                 return "Done computing!"
-            
         with ui.layout_column_wrap(width=1):
-            with ui.card():
+            with ui.card(style="height: auto;"):
                 with ui.card():
-                    ui.div('🔥 폭염 피해 예방의 핵심: 음성경보시스템', style="text-align: center; font-weight: bold; font-size: 30px;")
-                with ui.layout_column_wrap():
-                    with ui.card():
-                        ui.h4("✅ 음성경보시스템(AVAS)의 온열질환 예방 효과")
-                        with ui.layout_column_wrap(width=1):
-                            with ui.card(style="max-height: 250px;"):
-                                ui.markdown("""
-                                    ### **1. 사망자 수 감소 효과 (Heat-related Mortality 감소)** 
-                                    - 🇫🇷 **프랑스 (2006년)**: 폭염경보시스템(HWS) 도입 후 **약 4,400명의 초과 사망자** 예방  
-                                    - 🇭🇰 **홍콩(65세 이상)**: 허혈성 심장질환·뇌졸중 등과 관련된 사망 **약 1,300건 감소**  
-                                    - 🇬🇧 **영국**: 폭염경보 운영을 통해 **117명의 생명 보호** 및 **높은 비용 효율성 입증**""")
-                            with ui.card(style="max-height: 250px;"):
-                                ui.markdown("""
-                                            ### **2. 문자 기반 재난경보의 한계 보완** 
-                                            - 국내 **65세 이상 고령자의 스마트폰 보급률은 66.5%
-                                            - 스마트폰이 아니라면 재난문자 전달율 저하""")
+                    ui.div('경상북도 영천시 자동 음성 통보 시스템 현황', style="text-align: center; font-weight: bold; font-size: 30px;")
 
-                    with ui.card():
-                        ui.h4("✅ 음성경보시스템의 정의")
-                        with ui.layout_column_wrap(width=1):
-                            with ui.card(style="max-height: 250px;"):
-                                ui.markdown("""
-                                    ### **음성경보시스템이란?**  
+                with ui.layout_columns(col_widths=(9,3)):
+                    with ui.card(full_screen=True):
 
-                                    **음성경보시스템(AVAS, Automated Voice Alert System)은**  
-                                    특히 **고령자, 시각장애인, 문자 수신이 어려운 정보 취약계층**에게  
-                                    보다 빠르고 효과적으로 위험 상황을 전달할 수 있어,  
-                                    **즉각적인 행동 유도와 인명 피해 예방**에 중요한 역할을 합니다.
-                                    """)
-                            with ui.card(style="max-height: 250px;"):
-                                ui.h4("🔥 폭염 단계별 대응 수칙")
+                        @render_widget
+                        @reactive.event(input.go, ignore_none=False)
+                        def simple_auto_voice_map():  
+                            data_geojson = geojson_data
+                            selected_df = filtered_df()
+                            gdf_points = gpd.GeoDataFrame(
+                                selected_df,
+                                geometry=gpd.points_from_xy(selected_df['좌표정보(Y)'], selected_df['좌표정보(X)']),
+                                crs="EPSG:4326"
+                            ).to_crs(epsg=5181)
+                            gdf_buffer = gdf_points.copy()
+                            gdf_buffer["geometry"] = gdf_points.buffer(500)
+                            gdf_buffer = gdf_buffer.to_crs(epsg=4326)
+                            buffer_geojson = json.loads(gdf_buffer.to_json())
 
-                                ui.markdown("""
-                            | 구분   | 체감온도 기준 | 휴식 기준           | 야외 작업 기준           | 비고              |
-                            |--------|----------------|----------------------|----------------------------|-------------------|
-                            | 주의   | 33도           | 매 시간 10분 휴식    | 14~17시 야외 작업 조정     | -                 |
-                            | 경고   | 35도           | 매 시간 15분 휴식    | 14~17시 야외 작업 중지     | -                 |
-                            | 위험   | 38도           | 매 시간 15분 휴식    | 14~17시 야외 작업 중지     | 업무담당자 파견    |
-                                """)
-                    with ui.card():
-                        ui.img(
-                            src="음성경보시스템.png",
-                            alt="온열질환 예방 안내 이미지",
-                            style="height:600px; width:auto; display:block; margin:auto;"
-                        )
-                
-            
-        
-        with ui.layout_columns(col_widths=(9,3)):
-            with ui.card(full_screen=True):
-                ui.card_header("경상북도 영천시 자동 음성 통보 시스템 현황")
-                @render_widget
-                @reactive.event(input.go, ignore_none=False)
-                def simple_auto_voice_map():  
-                    data_geojson = geojson_data
-                    selected_df = filtered_df()
-                    gdf_points = gpd.GeoDataFrame(
-                        selected_df,
-                        geometry=gpd.points_from_xy(selected_df['좌표정보(Y)'], selected_df['좌표정보(X)']),
-                        crs="EPSG:4326"
-                    ).to_crs(epsg=5181)
-                    gdf_buffer = gdf_points.copy()
-                    gdf_buffer["geometry"] = gdf_points.buffer(500)
-                    gdf_buffer = gdf_buffer.to_crs(epsg=4326)
-                    buffer_geojson = json.loads(gdf_buffer.to_json())
-                    
-                    
-                                
-                    selected_names = input.space()  # 원정추가
-                    selected_gdf = gdf[gdf['ADM_NM'].isin(selected_names)]
-                    selected_geojson = json.loads(selected_gdf.to_json())
-                    
-                    #### layers
-                    layers = [
-                        {
-                            "sourcetype": "geojson",
-                            "source": data_geojson,
-                            "type": "line",
-                            "color": "black",
-                            "line": {"width": 1},
-                            "below": "traces"
-                        },
-                        {
-                                "sourcetype": "geojson",    # 원정추가가
-                                "source": selected_geojson,
-                                "type": "fill",
-                                "color": "rgba(0, 100, 255, 0.2)",  # ✅ 연한 파란색 채움
-                                "below": "traces"
-                        },
-                        
-                        # ✅ [추가] 각 점의 반경 500m 원 표시
-                        {
-                            "sourcetype": "geojson",
-                            "source": buffer_geojson,
-                            "type": "fill",
-                            "color": "rgba(0, 0, 255, 0.1)",
-                            "below": "traces"
-                        },
-                        # {
-                        #     "sourcetype": "geojson",
-                        #     "source": buffer_geojson,
-                        #     "type": "line",
-                        #     "color": "blue",
-                        #     "line": {"width": 1},
-                        #     "below": "traces"  # 원정추가
-                        # }
-                    ]
-                    
-                    
-                    fig = px.scatter_mapbox(
-                        selected_df,
-                        lat='좌표정보(X)',
-                        lon='좌표정보(Y)',
-                        # color='색상',
-                        hover_name='장소명',
-                        hover_data={'좌표정보(X)': True, '좌표정보(Y)': True},
-                        text='장소명',
-                        zoom=10,
-                        height=600,
-                        width=1100,
-                        title='경상북도 영천시 자동 음성통보시스템'
-                    )
-                    fig.update_layout(
-                        mapbox_style="carto-positron",
-                        mapbox_layers=layers,
-                        mapbox_center={"lat": 35.97326, "lon": 128.938613},
-                        margin={"r": 0, "t": 30, "l": 0, "b": 0}
-                    )
-                    
-                    
-                    return fig
-                
-                            
-             
-            with ui.layout_column_wrap(width=1):
-                with ui.value_box(showcase=icon_svg("walkie-talkie")):
-                    "자동음성통보시스템 수"
 
-                    @render.text
-                    @reactive.event(input.go, ignore_none=False)
-                    def count():
-                        return filtered_df().shape[0]
-                        # return input.space()
-            
-                with ui.value_box(showcase=icon_svg("ruler-horizontal")):
-                    "행정동별 평균 수"
 
-                    @render.text
-                    @reactive.event(input.go, ignore_none=False)
-                    def bill_length():
-                        return round(filtered_df().groupby(['행정동명']).size().mean(), 2)
+                            selected_names = input.space()  # 원정추가
+                            selected_gdf = gdf[gdf['ADM_NM'].isin(selected_names)]
+                            selected_geojson = json.loads(selected_gdf.to_json())
 
-                with ui.value_box(showcase=icon_svg("calendar")):
-                    "평균 설치년도"
+                            #### layers
+                            layers = [
+                                {
+                                    "sourcetype": "geojson",
+                                    "source": data_geojson,
+                                    "type": "line",
+                                    "color": "black",
+                                    "line": {"width": 1},
+                                    "below": "traces"
+                                },
+                                {
+                                        "sourcetype": "geojson",    # 원정추가가
+                                        "source": selected_geojson,
+                                        "type": "fill",
+                                        "color": "rgba(0, 100, 255, 0.2)",  # ✅ 연한 파란색 채움
+                                        "below": "traces"
+                                },
 
-                    @render.text
-                    @reactive.event(input.go, ignore_none=False)
-                    def bill_depth():
-                        return f"{filtered_df()['설치일자'].mean():.1f}년"
+                                # ✅ [추가] 각 점의 반경 500m 원 표시
+                                {
+                                    "sourcetype": "geojson",
+                                    "source": buffer_geojson,
+                                    "type": "fill",
+                                    "color": "rgba(0, 0, 255, 0.1)",
+                                    "below": "traces"
+                                },
+                                # {
+                                #     "sourcetype": "geojson",
+                                #     "source": buffer_geojson,
+                                #     "type": "line",
+                                #     "color": "blue",
+                                #     "line": {"width": 1},
+                                #     "below": "traces"  # 원정추가
+                                # }
+                            ]
 
-        
-        with ui.layout_columns():
-            with ui.card(full_screen=True):
-                ui.card_header("경상북도 영천시 자동 음성 통보 시스템 행정구역별")
+                            fig = px.scatter_mapbox(
+                                selected_df,
+                                lat='좌표정보(X)',
+                                lon='좌표정보(Y)',
+                                # color='색상',
+                                hover_name='장소명',
+                                hover_data={'좌표정보(X)': True, '좌표정보(Y)': True},
+                                text='장소명',
+                                zoom=10,
+                                height=600,
+                                width=1100,
+                                title='경상북도 영천시 자동 음성통보시스템'
+                            )
+                            fig.update_layout(
+                                mapbox_style="carto-positron",
+                                mapbox_layers=layers,
+                                mapbox_center={"lat": 35.97326, "lon": 128.938613},
+                                margin={"r": 0, "t": 30, "l": 0, "b": 0}
+                            )
 
-                @render_widget
-                @reactive.event(input.go, ignore_none=False)
-                def plot_elder_map():
-                    with open(app_dir / 'data/ychsi4326.geojson', encoding='utf-8') as f:
-                        geojson_data = json.load(f)
-                    auto_cnt = auto_voice.groupby(['행정동명']).size().reset_index(name='설치수')
-                    # ych_pop = pd.read_csv(app_dir / "data/ych_pop_clean.csv")
+                            return fig
 
-                    fig = px.choropleth_mapbox(
-                        auto_cnt,
-                        geojson=geojson_data,
-                        locations="행정동명",
-                        featureidkey="properties.ADM_NM",
-                        color="설치수",
-                        color_continuous_scale="Blues",
-                        mapbox_style="carto-positron",
-                        center={"lat": 35.97326, "lon": 128.938613},
-                        zoom=9,
-                        opacity=0.7,
-                        title="경상북도 영천시 자동 음성 통보 시스템 행정구역별"
-                    )
 
-                    fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0})
-                    return fig
-                    
 
-            with ui.card(full_screen=True):
-                ui.card_header("행정동별 자동음성통보시스템 현황")
+                    with ui.layout_column_wrap(width=1):
+                        with ui.value_box(showcase=icon_svg("walkie-talkie")):
+                            "자동음성통보시스템 수"
 
-                @render_widget
-                @reactive.event(input.go, ignore_none=False)
-                def admin_chart():
-                    admin_counts = auto_voice['행정동명'].value_counts().reset_index()
-                    admin_counts.columns = ['행정동명', '설치 수']
-                    color_map = {
-                        name: "#FF5733" if name in input.space() else "lightgray"
-                        for name in admin_counts["행정동명"]
-                    }
+                            @render.text
+                            @reactive.event(input.go, ignore_none=False)
+                            def count():
+                                return filtered_df().shape[0]
+                                # return input.space()
 
-                    fig = px.bar(
-                        admin_counts, 
-                        x='행정동명', 
-                        y='설치 수',
-                        color='행정동명',
-                        color_discrete_map=color_map,
-                        title='행정동별 자동음성통보시스템 설치 현황'
-                    )
-                    
-                    fig.update_layout(xaxis_title='행정동명', yaxis_title='설치 수')
-                    return fig
+                        with ui.value_box(showcase=icon_svg("ruler-horizontal")):
+                            "행정동별 평균 수"
+
+                            @render.text
+                            @reactive.event(input.go, ignore_none=False)
+                            def bill_length():
+                                return round(filtered_df().groupby(['행정동명']).size().mean(), 2)
+
+                        with ui.value_box(showcase=icon_svg("calendar")):
+                            "평균 설치년도"
+
+                            @render.text
+                            @reactive.event(input.go, ignore_none=False)
+                            def bill_depth():
+                                return f"{filtered_df()['설치일자'].mean():.1f}년"
+
+
+                with ui.layout_columns():
+                    with ui.card(full_screen=True):
+                        ui.card_header("경상북도 영천시 자동 음성 통보 시스템 행정구역별")
+
+                        @render_widget
+                        @reactive.event(input.go, ignore_none=False)
+                        def plot_elder_map():
+                            with open(app_dir / 'data/ychsi4326.geojson', encoding='utf-8') as f:
+                                geojson_data = json.load(f)
+                            auto_cnt = auto_voice.groupby(['행정동명']).size().reset_index(name='설치수')
+                            # ych_pop = pd.read_csv(app_dir / "data/ych_pop_clean.csv")
+
+                            fig = px.choropleth_mapbox(
+                                auto_cnt,
+                                geojson=geojson_data,
+                                locations="행정동명",
+                                featureidkey="properties.ADM_NM",
+                                color="설치수",
+                                color_continuous_scale="Blues",
+                                mapbox_style="carto-positron",
+                                center={"lat": 35.97326, "lon": 128.938613},
+                                zoom=9,
+                                opacity=0.7,
+                                title="경상북도 영천시 자동 음성 통보 시스템 행정구역별"
+                            )
+
+                            fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0})
+                            return fig
+
+
+                    with ui.card(full_screen=True):
+                        ui.card_header("행정동별 자동음성통보시스템 현황")
+
+                        @render_widget
+                        @reactive.event(input.go, ignore_none=False)
+                        def admin_chart():
+                            admin_counts = auto_voice['행정동명'].value_counts().reset_index()
+                            admin_counts.columns = ['행정동명', '설치 수']
+                            color_map = {
+                                name: "#FF5733" if name in input.space() else "lightgray"
+                                for name in admin_counts["행정동명"]
+                            }
+
+                            fig = px.bar(
+                                admin_counts, 
+                                x='행정동명', 
+                                y='설치 수',
+                                color='행정동명',
+                                color_discrete_map=color_map,
+                                title='행정동별 자동음성통보시스템 설치 현황'
+                            )
+
+                            fig.update_layout(xaxis_title='행정동명', yaxis_title='설치 수')
+                            return fig
 
 
 with ui.nav_panel('농업 지역 및 인구 격자'):
@@ -863,13 +864,13 @@ with ui.nav_panel('농업 지역 및 인구 격자'):
                             ]
                             
                             # 로딩 때문에 꺼놓음 켜야함
-                            # layers.append({
-                            #         "sourcetype": "geojson",  # 과수
-                            #         "source": geojson_fruit,
-                            #         "type": "fill",
-                            #         "color": "rgba(189, 215, 231, 0.2)",  # 연한 초록
-                            #         "below": "traces"
-                            #     })
+                            layers.append({
+                                    "sourcetype": "geojson",  # 과수
+                                    "source": geojson_fruit,
+                                    "type": "fill",
+                                    "color": "rgba(0, 180, 100, 0.5)",  # 진한 청록 (투명도 0.5)
+                                    "below": "traces"
+                                })
                             
                             fig = px.scatter_mapbox(
                                 auto_voice,
@@ -899,21 +900,18 @@ with ui.nav_panel('농업 지역 및 인구 격자'):
                     
                     
                     with ui.card(full_screen=True):
-                        # ui.card_header("")
+                        ui.card_header("영천시 재배지 및 자동 음성 통보 시스템(ATMS) 분포 현황")
+                        ui.p(
+                            "이 지도는 경상북도 영천시의 주요 농업 재배지(논, 과수, 시설, 마을)와 "
+                            "재해 예방을 위한 자동 음성 통보 시스템(ATMS) 위치를 함께 시각화한 결과입니다."
+                        )
+                        ui.p("재배지와 자동 음성 통보 시스템(ATMS)을 한눈에!")
+                        ui.p("ATMS 마커는 재해·기상 특보 발생 시 신속한 경보 전달을 담당하는 시스템의 실제 위치를 나타냅니다.")
+                        ui.h5("활용예시")
+                        ui.p("행정기관은 농업 재배지와 ATMS의 분포를 비교해 시스템 미설치 지역, 취약지대를 신속히 파악할 수 있습니다.")
+                        ui.p("농민/마을 주민은 내 주변에 어떤 재배지와 ATMS가 있는지 쉽게 확인할 수 있습니다.")
+                        ui.p("효율적인 농업 재해 예방 정책 수립, 신속한 경보 체계 강화 등에 활용할 수 있습니다.")
 
-                        "- 농업 지역:"
-                        ui.br()
-                        "논 재배현황 시각화."
-                        ui.br()
-                        "과수 재배현황 시각화."
-                        ui.br()
-                        "마을 재배현황 시각화."
-                        ui.br()
-                        "시설 재배현황 시각화."
-                        # ui.card_footer("<경상북도_팜맵과 드론 활용 경상북도 영천시 논, 과수, 마을, 시설 재배현황_20210105>")
-                        
-                    with ui.card(full_screen=True):
-                        "text"
                         
                             
             
@@ -1004,249 +1002,221 @@ with ui.nav_panel('농업 지역 및 인구 격자'):
 with ui.nav_panel('자동 음성통보시스템 위치 제안'):
     with ui.card(full_screen=True):
         ui.card_header("This is the header")
-    #     with ui.layout_columns():
-    #         with ui.card(full_screen=True):
-    #             ui.card_header("경상북도 영천시 자동음성통보시스템")
+        with ui.layout_columns():
+            with ui.card(full_screen=True):
+                ui.card_header("경상북도 영천시 자동음성통보시스템")
 
-    #             # @render_plotly_streaming()
-    #             # @render_widget
-    #             @render.ui
-    #             @reactive.event(input.go, ignore_none=False)
-    #             async def auto_voice_map():
-    #                 with ui.Progress(min=0, max=2) as p:
-    #                     p.set(0, message='loading map....')
+                # @render_plotly_streaming()
+                # @render_widget
+                @render.ui
+                @reactive.event(input.go, ignore_none=False)
+                async def auto_voice_map():
+                    with ui.Progress(min=0, max=2) as p:
+                        p.set(0, message='loading map....')
 
-    #                     # shapefile_path = app_dir / 'data/ychsi-map/ychsi.shp'
-    #                     # gdf = gpd.read_file(shapefile_path)
+                        # shapefile_path = app_dir / 'data/ychsi-map/ychsi.shp'
+                        # gdf = gpd.read_file(shapefile_path)
 
-    #                     # gdf = gdf.to_crs(epsg=4326)  # 원정추가
-    #                     # gdf_boundary = gdf.copy()
-    #                     # gdf_boundary["geometry"] = gdf_boundary["geometry"].boundary
-    #                     # geojson_path = app_dir / "data/ychsi.geojson"  # 원정추가
+                        # gdf = gdf.to_crs(epsg=4326)  # 원정추가
+                        # gdf_boundary = gdf.copy()
+                        # gdf_boundary["geometry"] = gdf_boundary["geometry"].boundary
+                        # geojson_path = app_dir / "data/ychsi.geojson"  # 원정추가
 
-    #                     # gdf_boundary.to_file(geojson_path, driver="GeoJSON")
+                        # gdf_boundary.to_file(geojson_path, driver="GeoJSON")
 
-    #                     # with open(geojson_path, encoding='utf-8') as f:
-    #                     #     geojson_data = json.load(f)
-    #                     data_geojson = geojson_data
+                        # with open(geojson_path, encoding='utf-8') as f:
+                        #     geojson_data = json.load(f)
+                        data_geojson = geojson_data
                         
-    #                     # fruit_path = app_dir / "data/green.geojson"
-    #                     # with open(fruit_path, encoding='utf-8') as f:
-    #                     #     fruit_geojson = json.load(f)
-    #                     fruit_geojson = geojson_fruit
+                        # fruit_path = app_dir / "data/green.geojson"
+                        # with open(fruit_path, encoding='utf-8') as f:
+                        #     fruit_geojson = json.load(f)
+                        fruit_geojson = geojson_fruit
                         
-    #                     selected_names = input.space()  # 원정추가
-    #                     selected_gdf = gdf[gdf['ADM_NM'].isin(selected_names)]
-    #                     selected_geojson = json.loads(selected_gdf.to_json())
+                        selected_names = input.space()  # 원정추가
+                        selected_gdf = gdf[gdf['ADM_NM'].isin(selected_names)]
+                        selected_geojson = json.loads(selected_gdf.to_json())
 
-    #                     df = filtered_df().copy()
-    #                     df['색상'] = df['행정동명'].apply(
-    #                         lambda x: x if x in selected_names else '기타'
-    #                     )  # 원정추가
+                        df = filtered_df().copy()
+                        df['색상'] = df['행정동명'].apply(
+                            lambda x: x if x in selected_names else '기타'
+                        )  # 원정추가
 
-    #                     # ✅ [추가] 점 → 500m 버퍼 (원) 생성   원정추가
-    #                     # gdf_points = gpd.GeoDataFrame(
-    #                     #     df,
-    #                     #     geometry=gpd.points_from_xy(df['좌표정보(Y)'], df['좌표정보(X)']),
-    #                     #     crs="EPSG:4326"
-    #                     # ).to_crs(epsg=5181)  # 미터 단위 좌표계
+                        # ✅ [추가] 점 → 500m 버퍼 (원) 생성   원정추가
+                        # gdf_points = gpd.GeoDataFrame(
+                        #     df,
+                        #     geometry=gpd.points_from_xy(df['좌표정보(Y)'], df['좌표정보(X)']),
+                        #     crs="EPSG:4326"
+                        # ).to_crs(epsg=5181)  # 미터 단위 좌표계
 
-    #                     # gdf_buffer = gdf_points.copy()
-    #                     # gdf_buffer["geometry"] = gdf_points.buffer(500)  # 500m 원
+                        # gdf_buffer = gdf_points.copy()
+                        # gdf_buffer["geometry"] = gdf_points.buffer(500)  # 500m 원
 
-    #                     # gdf_buffer = gdf_buffer.to_crs(epsg=4326)  # 다시 위경도로
-    #                     # buffer_geojson = json.loads(gdf_buffer.to_json())  # GeoJSON 변환  #원정추가
-    #                     buffer_geojson = geojson_buffer  # GeoJSON 변환  #원정추가
+                        # gdf_buffer = gdf_buffer.to_crs(epsg=4326)  # 다시 위경도로
+                        # buffer_geojson = json.loads(gdf_buffer.to_json())  # GeoJSON 변환  #원정추가
+                        buffer_geojson = geojson_buffer  # GeoJSON 변환  #원정추가
                         
                         
-    #                     recd_df = pd.DataFrame({
-    #                             "name": ["A", "B", "C"],
-    #                             "위도": [36.00875, 35.98994, 36.0012],
-    #                             "경도": [128.98943, 128.96914, 129.02328]
-    #                         })
+                        recd_df = pd.DataFrame({
+                                "name": ["A", "B", "C"],
+                                "위도": [36.00875, 35.98994, 36.0012],
+                                "경도": [128.98943, 128.96914, 129.02328]
+                            })
                             
-    #                     recommend = px.scatter_mapbox(
-    #                         recd_df,
-    #                         lat="위도",
-    #                         lon="경도",
-    #                         hover_name="name",  # 마우스 오버시 이름 표시
-    #                         zoom=10,
-    #                         height=600,
-    #                         mapbox_style="carto-positron"  # 기본 지도 스타일
-    #                     )
+                        recommend = px.scatter_mapbox(
+                            recd_df,
+                            lat="위도",
+                            lon="경도",
+                            hover_name="name",  # 마우스 오버시 이름 표시
+                            zoom=10,
+                            height=600,
+                            mapbox_style="carto-positron"  # 기본 지도 스타일
+                        )
                         
                         
                             
                         
-    #                     # df_points는 이미 있음
-    #                     recd_points = gpd.GeoDataFrame(
-    #                         recd_df,
-    #                         geometry=gpd.points_from_xy(recd_df["경도"], recd_df["위도"]),  # 경도, 위도 순!
-    #                         crs="EPSG:4326"
-    #                     ).to_crs(epsg=5181)  # 미터 좌표계
+                        # df_points는 이미 있음
+                        recd_points = gpd.GeoDataFrame(
+                            recd_df,
+                            geometry=gpd.points_from_xy(recd_df["경도"], recd_df["위도"]),  # 경도, 위도 순!
+                            crs="EPSG:4326"
+                        ).to_crs(epsg=5181)  # 미터 좌표계
 
-    #                     recd_buffer = recd_points.copy()
-    #                     recd_buffer["geometry"] = recd_points.buffer(500)  # 500m 원
+                        recd_buffer = recd_points.copy()
+                        recd_buffer["geometry"] = recd_points.buffer(500)  # 500m 원
 
-    #                     recd_buffer = recd_buffer.to_crs(epsg=4326)  # 다시 위경도로
-    #                     geojson_recd = json.loads(recd_buffer.to_json())
+                        recd_buffer = recd_buffer.to_crs(epsg=4326)  # 다시 위경도로
+                        geojson_recd = json.loads(recd_buffer.to_json())
                         
 
-    #                     #### layers
-    #                     layers = [
-    #                         {
-    #                             "sourcetype": "geojson",
-    #                             "source": data_geojson,
-    #                             "type": "line",
-    #                             "color": "black",
-    #                             "line": {"width": 1},
-    #                             "below": "traces"
-    #                         },
-    #                         # {
-    #                         #     "sourcetype": "geojson",    # 원정추가가
-    #                         #     "source": selected_geojson,
-    #                         #     "type": "fill",
-    #                         #     "color": "rgba(0, 100, 255, 0.2)",  # ✅ 연한 파란색 채움
-    #                         #     "below": "traces"
-    #                         # },
-    #                         # ✅ 선택된 읍면동 테두리 강조
-    #                         {
-    #                             "sourcetype": "geojson",
-    #                             "source": selected_geojson,
-    #                             "type": "line",
-    #                             "color": "blue",
-    #                             "line": {"width": 3},
-    #                             "below": "traces"
-    #                         },
-    #                         # ✅ [추가] 각 점의 반경 500m 원 표시
-    #                         {
-    #                             "sourcetype": "geojson",
-    #                             "source": buffer_geojson,
-    #                             "type": "fill",
-    #                             "color": "rgba(0, 0, 255, 0.1)",
-    #                             "below": "traces"
-    #                         },
-    #                         # {
-    #                         #     "sourcetype": "geojson",
-    #                         #     "source": buffer_geojson,
-    #                         #     "type": "line",
-    #                         #     "color": "blue",
-    #                         #     "line": {"width": 1},
-    #                         #     "below": "traces"  # 원정추가
-    #                         # }
-    #                         {
-    #                             "sourcetype": "geojson",
-    #                             "source": geojson_recd,
-    #                             "type": "fill",
-    #                             "color": "rgba(255, 0, 0, 0.2)",  # 연한 빨강색, 원 색상 원하는대로 변경
-    #                             "below": "traces"
-    #                         }
-    #                     ]
+                        #### layers
+                        layers = [
+                            {
+                                "sourcetype": "geojson",
+                                "source": data_geojson,
+                                "type": "line",
+                                "color": "black",
+                                "line": {"width": 1},
+                                "below": "traces"
+                            },
+                            # {
+                            #     "sourcetype": "geojson",    # 원정추가가
+                            #     "source": selected_geojson,
+                            #     "type": "fill",
+                            #     "color": "rgba(0, 100, 255, 0.2)",  # ✅ 연한 파란색 채움
+                            #     "below": "traces"
+                            # },
+                            # ✅ 선택된 읍면동 테두리 강조
+                            {
+                                "sourcetype": "geojson",
+                                "source": selected_geojson,
+                                "type": "line",
+                                "color": "blue",
+                                "line": {"width": 3},
+                                "below": "traces"
+                            },
+                            # ✅ [추가] 각 점의 반경 500m 원 표시
+                            {
+                                "sourcetype": "geojson",
+                                "source": buffer_geojson,
+                                "type": "fill",
+                                "color": "rgba(0, 0, 255, 0.1)",
+                                "below": "traces"
+                            },
+                            # {
+                            #     "sourcetype": "geojson",
+                            #     "source": buffer_geojson,
+                            #     "type": "line",
+                            #     "color": "blue",
+                            #     "line": {"width": 1},
+                            #     "below": "traces"  # 원정추가
+                            # }
+                            {
+                                "sourcetype": "geojson",
+                                "source": geojson_recd,
+                                "type": "fill",
+                                "color": "rgba(255, 0, 0, 0.2)",  # 연한 빨강색, 원 색상 원하는대로 변경
+                                "below": "traces"
+                            }
+                        ]
 
-    #                     if "농경지" in input.option():
-    #                         layers.append({
-    #                             "sourcetype": "geojson",  # 과수
-    #                             "source": fruit_geojson,
-    #                             "type": "fill",
-    #                             "color": "rgba(0, 255, 0, 0.2)",  # 연한 초록
-    #                             "below": "traces"
-    #                         })
+                        if "농경지" in input.option():
+                            layers.append({
+                                "sourcetype": "geojson",  # 과수
+                                "source": fruit_geojson,
+                                "type": "fill",
+                                "color": "rgba(0, 255, 0, 0.2)",  # 연한 초록
+                                "below": "traces"
+                            })
                         
                         
-    #                     fig = px.scatter_mapbox(
-    #                         df,
-    #                         lat='좌표정보(X)',
-    #                         lon='좌표정보(Y)',
-    #                         color='색상',
-    #                         hover_name='장소명',
-    #                         hover_data={'좌표정보(X)': True, '좌표정보(Y)': True},
-    #                         text='장소명',
-    #                         zoom=10,
-    #                         height=800,
-    #                         width=1300,
-    #                         title='경상북도 영천시 자동 음성통보시스템'
-    #                     )
-    #                     fig.update_layout(
-    #                         mapbox_style="carto-positron",
-    #                         mapbox_layers=layers,
-    #                         mapbox_center={"lat": 35.97326, "lon": 128.938613},
-    #                         margin={"r": 0, "t": 30, "l": 0, "b": 0}
-    #                     )
+                        fig = px.scatter_mapbox(
+                            df,
+                            lat='좌표정보(X)',
+                            lon='좌표정보(Y)',
+                            color='색상',
+                            hover_name='장소명',
+                            hover_data={'좌표정보(X)': True, '좌표정보(Y)': True},
+                            text='장소명',
+                            zoom=10,
+                            height=800,
+                            width=1300,
+                            title='경상북도 영천시 자동 음성통보시스템'
+                        )
+                        fig.update_layout(
+                            mapbox_style="carto-positron",
+                            mapbox_layers=layers,
+                            mapbox_center={"lat": 35.97326, "lon": 128.938613},
+                            margin={"r": 0, "t": 30, "l": 0, "b": 0}
+                        )
                         
-    #                     for trace in recommend.data:
-    #                         fig.add_trace(trace)
+                        for trace in recommend.data:
+                            fig.add_trace(trace)
                         
 
-    #                     if "인구격자" in input.option():
-    #                         choropleth = go.Choroplethmapbox(
-    #                                         geojson=geojson_grid,            # 격자 geojson
-    #                                         locations=gdf_grid.index,           # 고유 id (index, 혹은 gid)
-    #                                         z=gdf_grid['jenks_class'],          # 구간(색상 기준)
-    #                                         colorscale='Blues',
-    #                                         marker_opacity=0.6,
-    #                                         marker_line_width=0,
-    #                                         customdata=gdf_grid[['val']],       # hover에 보여줄 값 추가
-    #                                         hovertemplate='<b>인구수:</b> %{customdata[0]}<br><b>클래스:</b> %{z}<extra></extra>'
-    #                                     )
-    #                         fig.add_trace(choropleth)
+                        if "인구격자" in input.option():
+                            choropleth = go.Choroplethmapbox(
+                                            geojson=geojson_grid,            # 격자 geojson
+                                            locations=gdf_grid.index,           # 고유 id (index, 혹은 gid)
+                                            z=gdf_grid['jenks_class'],          # 구간(색상 기준)
+                                            colorscale='Blues',
+                                            marker_opacity=0.6,
+                                            marker_line_width=0,
+                                            customdata=gdf_grid[['val']],       # hover에 보여줄 값 추가
+                                            hovertemplate='<b>인구수:</b> %{customdata[0]}<br><b>클래스:</b> %{z}<extra></extra>'
+                                        )
+                            fig.add_trace(choropleth)
                             
 
 
-    #                     p.set(2, message="complete")
+                        p.set(2, message="complete")
                         
-    #                     return fig
+                        return fig
 
 
-    #             # with ui.card(full_screen=True):
-    #             #     ui.card_header("자동음성통보시스템")
+                # with ui.card(full_screen=True):
+                #     ui.card_header("자동음성통보시스템")
 
-    #             #     @render.data_frame
-    #             #     @reactive.event(input.go, ignore_none=False)
-    #             #     def summary_statistics():
-    #             #         cols = [
-    #             #             "연번",
-    #             #             "행정동명",
-    #             #             "도로명주소",
-    #             #             "장소명",
-    #             #             "좌표정보(X)",
-    #             #             "좌표정보(Y)"
-    #             #         ]
-    #             #         return render.DataGrid(filtered_df()[cols], filters=True)
+                #     @render.data_frame
+                #     @reactive.event(input.go, ignore_none=False)
+                #     def summary_statistics():
+                #         cols = [
+                #             "연번",
+                #             "행정동명",
+                #             "도로명주소",
+                #             "장소명",
+                #             "좌표정보(X)",
+                #             "좌표정보(Y)"
+                #         ]
+                #         return render.DataGrid(filtered_df()[cols], filters=True)
 
-    #         # ui.include_css(app_dir / "styles.css")
+            # ui.include_css(app_dir / "styles.css")
 
         
-    #     ui.p("This is the body.")
-    #     ui.p("This is still the body.")
-    #     ui.card_footer("This is the footer")
+        ui.p("This is the body.")
+        ui.p("This is still the body.")
+        ui.card_footer("This is the footer")
         
-    # with ui.card():
-    #     @render_widget
-    #     def test_map():
-    #         df = pd.DataFrame({
-    #                             "name": ["A", "B", "C"],
-    #                             "위도": [36.00875, 35.98994, 36.0012],
-    #                             "경도": [128.98943, 128.96914, 129.02328]
-    #                         })
-                            
-    #         recommend = px.scatter_mapbox(
-    #             df,
-    #             lat="위도",
-    #             lon="경도",
-    #             hover_name="name",  # 마우스 오버시 이름 표시
-    #             color='red',
-    #             zoom=10,
-    #             height=600,
-    #             mapbox_style="carto-positron"  # 기본 지도 스타일
-    #         )
-            
-    #         return recommend
     
     
-# ui.nav_spacer()
-# with ui.nav_panel(ui.img(
-#             src = "auto-voice-logo.png", 
-#             height="50px", style="vertical-align: middle; margin-right: 10px;"
-#         )):
-#     with ui.card():
-#         ui.card_header("Hello World!")
