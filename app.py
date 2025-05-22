@@ -149,7 +149,7 @@ with ui.nav_panel('자동 음성 통보시스템이란?'):
                         #     p.set(i, message="Computing")
                         #     await asyncio.sleep(0.1)
 
-                return "Done computing!"
+                return 
         with ui.layout_column_wrap(width=1):
             with ui.card(style="height: auto;"):
                 with ui.card():
@@ -539,15 +539,15 @@ with ui.nav_panel('농업 지역 및 인구 격자'):
             def show_important_message():
                 m = ui.modal(  
                     ui.markdown("""
-                                -  **영천시 농경지 분포와 ATMS 위치 비교**  
-                                    → 농업 활동 밀집 지역 중 **ATMS가 미설치된 사각지대**를 확인할 수 있으며,  
+                                -  **영천시 재배지 분포와 AVAS 위치 비교**  
+                                    → 농업 활동 밀집 지역 중 **AVAS가 미설치된 사각지대**를 확인할 수 있으며,  
                                         **폭염 시 야외작업 중인 농민 보호**를 위한 우선 설치 지역을 파악
 
-                                -  **영천시 고령인구 분포(500m 격자)와 ATMS 위치 비교**  
+                                -  **영천시 고령인구 분포(500m 격자)와 AVAS 위치 비교**  
                                     → **고령인구 밀집 지역** 중 자동 알림이 어려운 지역을 확인하여,  
                                         **취약계층 보호를 위한 맞춤형 경보 인프라 확충**에 활용 \n
                                 
-                                ATMS 마커는 재해·기상 특보 발생 시 신속한 경보 전달을 담당하는 시스템의 실제 위치를 나타냅니다.
+                                AVAS 마커는 재해·기상 특보 발생 시 신속한 경보 전달을 담당하는 시스템의 실제 위치를 나타냅니다.
                                 """),
                     size='x1' , 
                     easy_close=True,  
@@ -562,9 +562,9 @@ with ui.nav_panel('농업 지역 및 인구 격자'):
                 m = ui.modal(  
                     ui.markdown("""
                                 폭염 시 **선제적 알림 및 반복 방송**을 통해 온열질환 예방과 **취약계층 보호**에 기여 \n
-                                - **행정기관**: 농경지/고령인구/ATMS 위치를 종합적으로 고려해  **폭염 대응 취약 지역에 대한 우선 설치 계획**을 수립 \n
+                                - **행정기관**: 재배지/고령인구/AVAS 위치를 종합적으로 고려해  **폭염 대응 취약 지역에 대한 우선 설치 계획**을 수립 \n
                                 - **정책 결정자 및 재난 대응 부서**: **효율적인 예산 배분**, **경보 사각지대 해소**에 근거 자료로 활용 \n
-                                - **지역 주민(농민 및 고령층)**:  **자신의 거주지 주변 ATMS 설치 여부**와 **폭염 정보 수신 가능성**을 직접 확인함으로써, **위험 상황에 대한 대비와 행동 요령 습득에 도움**을 받을 수 있음
+                                - **지역 주민(농민 및 고령층)**:  **자신의 거주지 주변 AVAS 설치 여부**와 **폭염 정보 수신 가능성**을 직접 확인함으로써, **위험 상황에 대한 대비와 행동 요령 습득에 도움**을 받을 수 있음
                                 """),
                     size='x1' , 
                     easy_close=True,  
@@ -798,20 +798,21 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
     """)
     with ui.panel_absolute(  
     width="450px",  
-    right="50px",  
-    top="50px",  
+    left="30px",  
+    top="250px",  
     draggable=True,  
     class_="panel-absolute",  # Add class for targeting with CSS
 
     ):  
         with ui.panel_well(class_="panel-well"):
-            ui.h2("지도 레이어 설정")
+            ui.h3("지도 레이어 설정")
+            
             ui.input_checkbox_group(
                 "option",
                 "옵션",
                 #auto_voice['행정동명'].value_counts().index.to_list(),
                 selected=[],
-                choices = ['농경지','인구격자', '고령인구 수 기반 위치 추천','추천 예시'], #원정추가 / 체크박스 모두 표시 안되게 시작
+                choices = ['재배지','인구격자', '추천 예시', '고령인구 수 기반 위치 추천'], #원정추가 / 체크박스 모두 표시 안되게 시작
                 # selected=[choices[0]] #원정추가
             )
             
@@ -831,277 +832,426 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
                     
             ui.input_action_button("go2", "적용", class_="btn-success")
             
+            ui.markdown('\n')
+            
+            
             @render.ui
             @reactive.event(input.go2, ignore_none=False)
             async def compute3():
                 with ui.Progress(min=1, max=15) as p:
                     p.set(message="Calculation in progress", detail="This may take a while...")
 
-                    # for i in range(1, 15):
-                    #     p.set(i, message="Computing")
-                    #     await asyncio.sleep(0.1)
-
                 return
+    
+    @render.ui
+    def legend_panel():
+        if "인구격자" in input.option():
+            return ui.div(
+                
+                ui.tags.div(
+                    ui.markdown("""
+                                    <div style="font-size:16px; font-weight:bold; margin-bottom:8px;">색상 범례</div>
+                                    <table>
+                                    <thead>
+                                    <tr><th>색상</th><th>그룹</th><th>고령 인구수 범위(명)</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    <td><div style="width: 30px; height: 20px; background-color: #fff5f0; border: 1px solid #ccc;"></div></td>
+                                    <td>0</td><td>0 - 18</td>
+                                    </tr>
+                                    <tr>
+                                    <td><div style="width: 30px; height: 20px; background-color: #fcbba1; border: 1px solid #ccc;"></div></td>
+                                    <td>1</td><td>19 - 113</td>
+                                    </tr>
+                                    <tr>
+                                    <td><div style="width: 30px; height: 20px; background-color: #fb6a4a; border: 1px solid #ccc;"></div></td>
+                                    <td>2</td><td>114 - 297</td>
+                                    </tr>
+                                    <tr>
+                                    <td><div style="width: 30px; height: 20px; background-color: #de2d26; border: 1px solid #ccc;"></div></td>
+                                    <td>3</td><td>298 - 619</td>
+                                    </tr>
+                                    <tr>
+                                    <td><div style="width: 30px; height: 20px; background-color: #a50f15; border: 1px solid #ccc;"></div></td>
+                                    <td>4</td><td>620 - 1110</td>
+                                    </tr>
+                                    </tbody>
+                                    </table>
+                                    """),
+                    class_="panel-well",
+                    style="padding: 15px;"
+                ),
+                style="width: 450px; position: absolute; left: 30px; top: 620px; border-radius: 30px; box-sizing: border-box;box-shadow: 0 4px 8px rgba(0,0,0,0.1);",
+                class_="panel-absolute",
+                # Using HTML5 data attribute for draggable
+                **{"data-draggable": "true"}
+            )
+            
+        return None
+    
+    @render.ui
+    def green_panel():
+        if "재배지" in input.option():
+            return ui.div(
+                
+                ui.tags.div(
+                    ui.markdown("""
+                                <table>
+                                <thead>
+                                    <tr><th>색상</th><th>범례</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    <td>
+                                        <div style="width: 30px; height: 20px; background-color: rgba(198, 156, 109, 0.8); border: 1px solid #ccc;"></div>
+                                    </td>
+                                    <td>재배지</td>
+                                    </tr>
+                                </tbody>
+                                </table>
+                                → 농업 활동 밀집 지역 중 AVAS가 미설치된 사각지대를 확인할 수 있으며,  
+                                폭염 시 야외작업 중인 농민 보호를 위한 우선 설치 지역을 파악
+                                        
+                                    """),
+                    class_="panel-well",
+                    style="padding: 15px;"
+                ),
+                style="width: 450px; position: absolute; right: 20px; top: 68%; border-radius: 30px; box-sizing: border-box;box-shadow: 0 4px 8px rgba(0,0,0,0.1);",
+                class_="panel-absolute",
+                # Using HTML5 data attribute for draggable
+                **{"data-draggable": "true"}
+            )
+            
+        return None
+    
+    
+    @render.ui
+    def recommend_panel():
+        if "고령인구 수 기반 위치 추천" in input.option():
+            return ui.div(
+                
+                ui.tags.div(
+                    ui.markdown("""
+                                <table>
+                                <thead>
+                                    <tr><th>색상</th><th>범례</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    <td>
+                                        <div style="width: 30px; height: 20px; background-color: rgba(0, 210, 0, 0.8); border: 1px solid #ccc;"></div>
+                                    </td>
+                                    <td>고령인구 기반 추천 지역</td>
+                                    </tr>
+                                </tbody>
+                                </table>
+                                → 현재 재배지역에서 자동 음성 통보시스템이 커버하지 못하는 지역 중 설정한 노령 인구 수 이상인 지역을 보여줍니다.
+                                        
+                                    """),
+                    class_="panel-well",
+                    style="padding: 15px;"
+                ),
+                style="width: 450px; position: absolute; right: 20px; top: 70%; border-radius: 30px; box-sizing: border-box;box-shadow: 0 4px 8px rgba(0,0,0,0.1);",
+                class_="panel-absolute",
+                # Using HTML5 data attribute for draggable
+                **{"data-draggable": "true"}
+            )
+            
+        return None
+    
+    
+    @render.ui
+    def recommend_ex_panel():
+        if "추천 예시" in input.option():
+            return ui.div(
+                
+                ui.tags.div(
+                    ui.markdown("""
+                                <table>
+                                <thead>
+                                    <tr><th>색상</th><th>구분</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                    <td>
+                                        <div style="width: 30px; height: 20px; background-color: rgba(0, 0, 0, 0.7); border: 1px solid #ccc;"></div>
+                                    </td>
+                                    <td>위치 추천 예시</td>
+                                    </tr>
+                                </tbody>
+                                </table>
+                
+                                        
+                                    """),
+                    class_="panel-well",
+                    style="padding: 15px;"
+                ),
+                style="width: 450px; position: absolute; right: 20px; top: 85%; border-radius: 30px; box-sizing: border-box;box-shadow: 0 4px 8px rgba(0,0,0,0.1);",
+                class_="panel-absolute",
+                # Using HTML5 data attribute for draggable
+                **{"data-draggable": "true"}
+            )
+            
+        return None
             
    
-    with ui.card(full_screen=True):
-        ui.card_header("경상북도 영천시 자동음성통보시스템")
+    # with ui.card(full_screen=True):
+    # ui.card_header("경상북도 영천시 자동음성통보시스템")
 
-        # @render_plotly_streaming()
-        # @render_widget
-        @render.ui
-        @reactive.event(input.go2, ignore_none=False)
-        async def auto_voice_map():
-            with ui.Progress(min=0, max=2) as p:
-                p.set(0, message='loading map....')
+    # @render_plotly_streaming()
+    # @render_widget
+    @render.ui
+    @reactive.event(input.go2, ignore_none=False)
+    async def auto_voice_map():
+        with ui.Progress(min=0, max=2) as p:
+            p.set(0, message='loading map....')
 
-                data_geojson = geojson_data
-                
-
-                fruit_geojson = geojson_fruit
-                
-                selected_names = input.space()  # 원정추가
-                selected_gdf = gdf[gdf['ADM_NM'].isin(selected_names)]
-
-                df = filtered_df().copy()
-                df['색상'] = df['행정동명'].apply(
-                    lambda x: x if x in selected_names else '기타'
-                )  # 원정추가
-
-
-                buffer_geojson = geojson_buffer  # GeoJSON 변환  #원정추가
-                
-
-                
-                
-                
-
-                #### layers
-                layers = [
-                    {
-                        "sourcetype": "geojson",
-                        "source": data_geojson,
-                        "type": "line",
-                        "color": "black",
-                        "line": {"width": 1},
-                        "below": "traces"
-                    },
-                    # {
-                    #     "sourcetype": "geojson",    # 원정추가가
-                    #     "source": data_geojson,
-                    #     "type": "fill",
-                    #     "color": "rgba(0, 100, 255, 0.2)",  # ✅ 연한 파란색 채움
-                    #     "below": "traces"
-                    # },
-                    # ✅ 선택된 읍면동 테두리 강조
-                    # {
-                    #     "sourcetype": "geojson",
-                    #     "source": selected_geojson,
-                    #     "type": "line",
-                    #     "color": "blue",
-                    #     "line": {"width": 2},
-                    #     "below": "traces"
-                    # },
-                    # ✅ [추가] 각 점의 반경 500m 원 표시
-                    {
-                        "sourcetype": "geojson",
-                        "source": buffer_geojson,
-                        "type": "fill",
-                        "color": "rgba(100, 149, 237, 0.6)",
-                        "below": "traces"
-                    },
-                    # {
-                    #     "sourcetype": "geojson",
-                    #     "source": buffer_geojson,
-                    #     "type": "line",
-                    #     "color": "blue",
-                    #     "line": {"width": 1},
-                    #     "below": "traces"  # 원정추가
-                    # }
-                ]
-
-                if "농경지" in input.option():
-                    layers.append({
-                        "sourcetype": "geojson",  # 과수
-                        "source": fruit_geojson,
-                        "type": "fill",
-                        "color": "rgba(198, 156, 109, 0.8)",  # 연한 초록
-                        "below": "traces"
-                    })
-                
-                
-                fig = px.scatter_mapbox(
-                    df,
-                    lat='좌표정보(X)',
-                    lon='좌표정보(Y)',
-                    color='색상',
-                    hover_name='장소명',
-                    hover_data={'좌표정보(X)': True, '좌표정보(Y)': True},
-                    text='장소명',
-                    zoom=10,
-                    height=800,
-                    width=1600,
-                    title='경상북도 영천시 자동 음성통보시스템'
-                )
-                
-                
-                
-                
-                recd_df = pd.DataFrame({
-                        "name": ["A", "B", "C"],
-                        "위도": [35.985806, 35.98994, 35.880600],
-                        "경도": [128.914767, 128.96914, 128.889976]
-                    })
-                    
-                recommend = px.scatter_mapbox(
-                    recd_df,
-                    lat="위도",
-                    lon="경도",
-                    hover_name="name",  # 마우스 오버시 이름 표시
-                    zoom=10,
-                    height=600,
-                    mapbox_style="carto-positron"  # 기본 지도 스타일
-                )
-                
-                
-                if '추천 예시' in input.option():
-                
-                    # df_points는 이미 있음
-                    recd_points = gpd.GeoDataFrame(
-                        recd_df,
-                        geometry=gpd.points_from_xy(recd_df["경도"], recd_df["위도"]),  # 경도, 위도 순!
-                        crs="EPSG:4326"
-                    ).to_crs(epsg=5181)  # 미터 좌표계
-
-                    recd_buffer = recd_points.copy()
-                    recd_buffer["geometry"] = recd_points.buffer(500)  # 500m 원
-
-                    recd_buffer = recd_buffer.to_crs(epsg=4326)  # 다시 위경도로
-                    geojson_recd = json.loads(recd_buffer.to_json())
-                    
-                
-                    for trace in recommend.data:
-                        fig.add_trace(trace)
-                    
-                    layers.append({
-                        "sourcetype": "geojson",
-                        "source": geojson_recd,
-                        "type": "fill",
-                        "color": "rgba(0, 0, 0, 0.7)",  # 초록색, 원 색상 원하는대로 변경
-                        "below": "traces"
-                    })
-                    
-                    
-                
-
-                if "인구격자" in input.option():
-                    choropleth = go.Choroplethmapbox(
-                                    geojson=geojson_grid,            # 격자 geojson
-                                    locations=gdf_grid.index,           # 고유 id (index, 혹은 gid)
-                                    z=gdf_grid['jenks_class'],          # 구간(색상 기준)
-                                    colorscale='Reds',
-                                    marker_opacity=0.6,
-                                    showscale=False,
-                                    marker_line_width=0,
-                                    customdata=gdf_grid[['val']],       # hover에 보여줄 값 추가
-                                    hovertemplate='<b>인구수:</b> %{customdata[0]}<br><b>클래스:</b> %{z}<extra></extra>'
-                                )
-                    fig.add_trace(choropleth)
-                    
-                if "고령인구 수 기반 위치 추천" in input.option():
-                    from shapely.geometry import shape
-
-                    # 파일 경로
-                    grid_path = app_dir / "data/elderly_grid_squares.geojson"
-                    diff_path = app_dir / "data/difference_area.geojson"
-
-                    # GeoJSON 수동 파싱
-                    with open(grid_path, encoding="utf-8") as f:
-                        geojson_elderly = json.load(f)
-                    
-                    # geometry 생성
-                    geometries = [shape(feature["geometry"]) for feature in geojson_elderly["features"]]
-                    properties = [feature["properties"] for feature in geojson_elderly["features"]]
-
-                    # GeoSeries로 geometry 구성
-                    geometry_series = gpd.GeoSeries(geometries, crs="EPSG:4326")
-
-                    # GeoDataFrame 생성
-                    gdf_grid_rec = gpd.GeoDataFrame(properties, geometry=geometry_series)
-
-                    # difference_area.geojson 불러오기
-                    gdf_diff = gpd.read_file(diff_path)
-
-                    # 좌표계 맞추기
-                    gdf_grid_rec = gdf_grid_rec.to_crs(gdf_diff.crs)
-
-                    # val < n 조건을 만족하는 사각형 필터링
-                    gdf_grid_rec['val'] = gdf_grid_rec['val'].fillna(0)
-                    gdf_small_val = gdf_grid_rec[gdf_grid_rec["val"] <input.n()].copy()
-
-                    # 병합된 geometry로 삭제 대상 생성
-                    removal_union = gdf_small_val.unary_union
-
-                    # 차집합 수행
-                    gdf_diff["geometry"] = gdf_diff.geometry.difference(removal_union)
-
-                    # 유효한 geometry만 남기기
-                    gdf_diff = gdf_diff[gdf_diff.is_valid & ~gdf_diff.is_empty]
-                    gdf_diff = gdf_diff.to_crs("EPSG:4326")
-                    # # 저장
-                    output_path = app_dir / "data/difference_area_filtered21.geojson"
-                    gdf_diff.to_file(output_path, driver="GeoJSON")
-                    
-                    
-                    # GeoJSON 수동 파싱
-                    # with open(output_path, encoding="utf-8") as f:
-                    #     geojson_diff = json.load(f)
-                    
-                    
-                    
-                    geojson_diff = json.loads(gdf_diff.to_json())
-                    
-                    layers.append({
-                        "sourcetype": "geojson",  # 
-                        "source": geojson_diff,
-                        "type": "fill",
-                        "color": "rgba(0, 210, 0, 0.8)",  # 연한 초록
-                        "below": "traces"
-                    })
-                    
-               
-                fig.update_layout(
-                    mapbox_style="carto-positron",
-                    mapbox_layers=layers,
-                    mapbox_center={"lat": 35.97326, "lon": 128.938613},
-                    margin={"r": 0, "t": 30, "l": 0, "b": 0}
-                )
-                    
-
-
-                p.set(2, message="complete")
-                
-               
-                fig_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-                        
-                # 고유 ID 만들기 (재랜더링 대비)
-                import uuid
-                unique_id = f"mapbox-plot-{uuid.uuid4().hex}"
+            data_geojson = geojson_data
+            fruit_geojson = geojson_fruit
             
-                html_code = f"""
-                <div id="{unique_id}" style="height:600px;"></div>
-                <script>
-                    (function() {{
-                        const fig = {fig_json};
-                        Plotly.newPlot("{unique_id}", fig.data, fig.layout, {{
-                            scrollZoom: true,
-                            displayModeBar: true,
-                            responsive: true
-                        }});
-                    }})();
-                </script>
-                """
-                return HTML(html_code)
+            selected_names = input.space()  # 원정추가
+            # selected_gdf = gdf[gdf['ADM_NM'].isin(selected_names)]
+
+            # df = filtered_df().copy()
+            df = auto_voice.copy()
+            
+            
+            df['색상'] = df['행정동명'].apply(
+                lambda x: x if x in selected_names else '기타'
+            )  # 원정추가
+
+
+            buffer_geojson = geojson_buffer  # GeoJSON 변환  #원정추가
+            
+
+            
+
+            # layers
+            layers = [
+                {
+                    "sourcetype": "geojson",
+                    "source": data_geojson,
+                    "type": "line",
+                    "color": "black",
+                    "line": {"width": 1},
+                    "below": "traces"
+                },
+                # {
+                #     "sourcetype": "geojson",    # 원정추가가
+                #     "source": data_geojson,
+                #     "type": "fill",
+                #     "color": "rgba(0, 100, 255, 0.2)",  # ✅ 연한 파란색 채움
+                #     "below": "traces"
+                # },
+                # ✅ 선택된 읍면동 테두리 강조
+                # {
+                #     "sourcetype": "geojson",
+                #     "source": selected_geojson,
+                #     "type": "line",
+                #     "color": "blue",
+                #     "line": {"width": 2},
+                #     "below": "traces"
+                # },
+                # ✅ [추가] 각 점의 반경 500m 원 표시
+                {
+                    "sourcetype": "geojson",
+                    "source": buffer_geojson,
+                    "type": "fill",
+                    "color": "rgba(100, 149, 237, 0.6)",
+                    "below": "traces"
+                },
+                # {
+                #     "sourcetype": "geojson",
+                #     "source": buffer_geojson,
+                #     "type": "line",
+                #     "color": "blue",
+                #     "line": {"width": 1},
+                #     "below": "traces"  # 원정추가
+                # }
+            ]
+
+            if "재배지" in input.option():
+                layers.append({
+                    "sourcetype": "geojson",  # 과수
+                    "source": fruit_geojson,
+                    "type": "fill",
+                    "color": "rgba(198, 156, 109, 0.8)",  # 연한 초록
+                    "below": "traces"
+                })
+            
+            
+            fig = px.scatter_mapbox(
+                df,
+                lat='좌표정보(X)',
+                lon='좌표정보(Y)',
+                color='색상',
+                hover_name='장소명',
+                hover_data={'좌표정보(X)': True, '좌표정보(Y)': True},
+                text='장소명',
+                zoom=10,
+                height=1000,
+                width=1650,
+                title='경상북도 영천시 자동 음성통보시스템'
+            )
+            
+            
+            
+            
+            recd_df = pd.DataFrame({
+                    "name": ["A", "B", "C"],
+                    "위도": [35.985806, 35.98994, 35.880600],
+                    "경도": [128.914767, 128.96914, 128.889976]
+                })
+                
+            recommend = px.scatter_mapbox(
+                recd_df,
+                lat="위도",
+                lon="경도",
+                hover_name="name",  # 마우스 오버시 이름 표시
+                zoom=10,
+                height=600,
+                mapbox_style="carto-positron"  # 기본 지도 스타일
+            )
+            
+            
+            if '추천 예시' in input.option():
+            
+                # df_points는 이미 있음
+                recd_points = gpd.GeoDataFrame(
+                    recd_df,
+                    geometry=gpd.points_from_xy(recd_df["경도"], recd_df["위도"]),  # 경도, 위도 순!
+                    crs="EPSG:4326"
+                ).to_crs(epsg=5181)  # 미터 좌표계
+
+                recd_buffer = recd_points.copy()
+                recd_buffer["geometry"] = recd_points.buffer(500)  # 500m 원
+
+                recd_buffer = recd_buffer.to_crs(epsg=4326)  # 다시 위경도로
+                geojson_recd = json.loads(recd_buffer.to_json())
+                
+            
+                for trace in recommend.data:
+                    fig.add_trace(trace)
+                
+                layers.append({
+                    "sourcetype": "geojson",
+                    "source": geojson_recd,
+                    "type": "fill",
+                    "color": "rgba(0, 0, 0, 0.7)",  # 초록색, 원 색상 원하는대로 변경
+                    "below": "traces"
+                })
+                
+                
+            
+
+            if "인구격자" in input.option():
+                choropleth = go.Choroplethmapbox(
+                                geojson=geojson_grid,            # 격자 geojson
+                                locations=gdf_grid.index,           # 고유 id (index, 혹은 gid)
+                                z=gdf_grid['jenks_class'],          # 구간(색상 기준)
+                                colorscale='Reds',
+                                marker_opacity=0.6,
+                                showscale=False,
+                                marker_line_width=0,
+                                customdata=gdf_grid[['val']],       # hover에 보여줄 값 추가
+                                hovertemplate='<b>인구수:</b> %{customdata[0]}<br><b>클래스:</b> %{z}<extra></extra>'
+                            )
+                fig.add_trace(choropleth)
+                
+            if "고령인구 수 기반 위치 추천" in input.option():
+                from shapely.geometry import shape
+
+                # 파일 경로
+                grid_path = app_dir / "data/elderly_grid_squares.geojson"
+                diff_path = app_dir / "data/difference_area.geojson"
+
+                # GeoJSON 수동 파싱
+                with open(grid_path, encoding="utf-8") as f:
+                    geojson_elderly = json.load(f)
+                
+                # geometry 생성
+                geometries = [shape(feature["geometry"]) for feature in geojson_elderly["features"]]
+                properties = [feature["properties"] for feature in geojson_elderly["features"]]
+
+                # GeoSeries로 geometry 구성
+                geometry_series = gpd.GeoSeries(geometries, crs="EPSG:4326")
+
+                # GeoDataFrame 생성
+                gdf_grid_rec = gpd.GeoDataFrame(properties, geometry=geometry_series)
+
+                # difference_area.geojson 불러오기
+                gdf_diff = gpd.read_file(diff_path)
+
+                # 좌표계 맞추기
+                gdf_grid_rec = gdf_grid_rec.to_crs(gdf_diff.crs)
+
+                # val < n 조건을 만족하는 사각형 필터링
+                gdf_grid_rec['val'] = gdf_grid_rec['val'].fillna(0)
+                gdf_small_val = gdf_grid_rec[gdf_grid_rec["val"] <input.n()].copy()
+
+                # 병합된 geometry로 삭제 대상 생성
+                removal_union = gdf_small_val.unary_union
+
+                # 차집합 수행
+                gdf_diff["geometry"] = gdf_diff.geometry.difference(removal_union)
+
+                # 유효한 geometry만 남기기
+                gdf_diff = gdf_diff[gdf_diff.is_valid & ~gdf_diff.is_empty]
+                gdf_diff = gdf_diff.to_crs("EPSG:4326")
+                # # 저장
+                output_path = app_dir / "data/difference_area_filtered21.geojson"
+                gdf_diff.to_file(output_path, driver="GeoJSON")
+                
+                
+                # GeoJSON 수동 파싱
+                # with open(output_path, encoding="utf-8") as f:
+                #     geojson_diff = json.load(f)
+                
+                
+                
+                geojson_diff = json.loads(gdf_diff.to_json())
+                
+                layers.append({
+                    "sourcetype": "geojson",  # 
+                    "source": geojson_diff,
+                    "type": "fill",
+                    "color": "rgba(0, 210, 0, 0.8)",  # 연한 초록
+                    "below": "traces"
+                })
+                
+            
+            fig.update_layout(
+                mapbox_style="carto-positron",
+                mapbox_layers=layers,
+                mapbox_center={"lat": 35.97326, "lon": 128.938613},
+                margin={"r": 0, "t": 30, "l": 0, "b": 0}
+            )
+                
+
+
+            p.set(2, message="complete")
+            
+            
+            fig_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+                    
+            # 고유 ID 만들기 (재랜더링 대비)
+            import uuid
+            unique_id = f"mapbox-plot-{uuid.uuid4().hex}"
+        
+            html_code = f"""
+            <div id="{unique_id}" style="height:600px;"></div>
+            <script>
+                (function() {{
+                    const fig = {fig_json};
+                    Plotly.newPlot("{unique_id}", fig.data, fig.layout, {{
+                        scrollZoom: true,
+                        displayModeBar: true,
+                        responsive: true
+                    }});
+                }})();
+            </script>
+            """
+            return HTML(html_code)
 
 
                     # with ui.card(full_screen=True):
