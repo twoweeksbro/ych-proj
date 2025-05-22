@@ -836,7 +836,7 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
             @render.ui
             @reactive.event(input.go2)
             @reactive.event(input.go3)
-            async def compute2():
+            async def compute3():
                 with ui.Progress(min=1, max=15) as p:
                     p.set(message="Calculation in progress", detail="This may take a while...")
 
@@ -1039,7 +1039,7 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
                     gdf_grid_rec = gdf_grid_rec.to_crs(gdf_diff.crs)
 
                     # val < 5 조건을 만족하는 사각형 필터링
-                    gdf_small_val = gdf_grid_rec[gdf_grid_rec["val"] < 15].copy()
+                    gdf_small_val = gdf_grid_rec[gdf_grid_rec["val"] < input.n()].copy()
 
                     # 병합된 geometry로 삭제 대상 생성
                     removal_union = gdf_small_val.unary_union
@@ -1049,19 +1049,19 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
 
                     # 유효한 geometry만 남기기
                     gdf_diff = gdf_diff[gdf_diff.is_valid & ~gdf_diff.is_empty]
-
+                    gdf_diff = gdf_diff.to_crs("EPSG:4326")
                     # # 저장
                     output_path = app_dir / "data/difference_area_filtered21.geojson"
                     gdf_diff.to_file(output_path, driver="GeoJSON")
                     
                     
                     # GeoJSON 수동 파싱
-                    with open(output_path, encoding="utf-8") as f:
-                        geojson_diff = json.load(f)
+                    # with open(output_path, encoding="utf-8") as f:
+                    #     geojson_diff = json.load(f)
                     
                     
                     
-                    # geojson_diff = json.loads(gdf_diff.to_json())
+                    geojson_diff = json.loads(gdf_diff.to_json())
                     
                     layers.append({
                         "sourcetype": "geojson",  # 
