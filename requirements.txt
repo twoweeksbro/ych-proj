@@ -11,4 +11,5 @@ plotly
 numpy
 folium
 mapclassify
-openpyxl
+shinyswatch
+shapely

@@ -267,7 +267,7 @@ with ui.nav_panel('자동 음성 통보시스템이란?'):
                                 return round(filtered_df().groupby(['행정동명']).size().mean(), 2)
 
                         with ui.value_box(showcase=icon_svg("calendar")):
-                            "최신신 설치년도"
+                            "최근 설치년도"
 
                             @render.text
                             @reactive.event(input.go, ignore_none=False)
@@ -797,7 +797,7 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
     }
     """)
     with ui.panel_absolute(  
-    width="300px",  
+    width="450px",  
     right="50px",  
     top="50px",  
     draggable=True,  
@@ -814,28 +814,25 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
                 choices = ['농경지','인구격자', '고령인구 수 기반 위치 추천','추천 예시'], #원정추가 / 체크박스 모두 표시 안되게 시작
                 # selected=[choices[0]] #원정추가
             )
-            ui.input_action_button("go2", "적용", class_="btn-success")
             
             ui.markdown('\n')
             ui.br()
             
             
-            ui.input_checkbox_group(
-                "option2",
-                "추천",
-                #auto_voice['행정동명'].value_counts().index.to_list(),
-                selected=[],
-                choices = ['고령인구 수 기반 위치 추천', '추천 예시'], #원정추가 / 체크박스 모두 표시 안되게 시작
-                # selected=[choices[0]] #원정추가
-            )
-            ui.input_action_button("go3", "적용", class_="btn-success")
-            
-            ui.input_slider("n", "인구수 설정", 0, 100, 10)
-
+            @render.ui
+            def show_slider():
+                if '고령인구 수 기반 위치 추천' in input.option():
+                    return ui.input_slider("n", "인구수 설정", 0, 30, 10)
+                    # @render.ui
+            # @reactive.event(input.go2)
+            # def showUi():
+            #     if '고령인구 수 기반 위치 추천' in input.option():
+            #         return ui.input_slider("n", "인구수 설정", 0, 500, 10)    
+                    
+            ui.input_action_button("go2", "적용", class_="btn-success")
             
             @render.ui
-            @reactive.event(input.go2)
-            @reactive.event(input.go3)
+            @reactive.event(input.go2, ignore_none=False)
             async def compute3():
                 with ui.Progress(min=1, max=15) as p:
                     p.set(message="Calculation in progress", detail="This may take a while...")
@@ -952,8 +949,8 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
                 
                 recd_df = pd.DataFrame({
                         "name": ["A", "B", "C"],
-                        "위도": [36.00875, 35.98994, 36.0012],
-                        "경도": [128.98943, 128.96914, 129.02328]
+                        "위도": [35.985806, 35.98994, 35.880600],
+                        "경도": [128.914767, 128.96914, 128.889976]
                     })
                     
                 recommend = px.scatter_mapbox(
@@ -990,7 +987,7 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
                         "sourcetype": "geojson",
                         "source": geojson_recd,
                         "type": "fill",
-                        "color": "rgba(0, 128, 0, 0.6)",  # 초록색, 원 색상 원하는대로 변경
+                        "color": "rgba(0, 0, 0, 0.7)",  # 초록색, 원 색상 원하는대로 변경
                         "below": "traces"
                     })
                     
@@ -1038,8 +1035,9 @@ with ui.nav_panel('자동 음성통보시스템 위치 제안'):
                     # 좌표계 맞추기
                     gdf_grid_rec = gdf_grid_rec.to_crs(gdf_diff.crs)
 
-                    # val < 5 조건을 만족하는 사각형 필터링
-                    gdf_small_val = gdf_grid_rec[gdf_grid_rec["val"] < input.n()].copy()
+                    # val < n 조건을 만족하는 사각형 필터링
+                    gdf_grid_rec['val'] = gdf_grid_rec['val'].fillna(0)
+                    gdf_small_val = gdf_grid_rec[gdf_grid_rec["val"] <input.n()].copy()
 
                     # 병합된 geometry로 삭제 대상 생성
                     removal_union = gdf_small_val.unary_union
